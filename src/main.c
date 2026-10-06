@@ -1,6 +1,6 @@
 
 #include "config.h"
-#include "title_music.h"
+#include "audio.h"
 
 enum {
     TITLE_BACKGROUND,
@@ -20,15 +20,15 @@ int main()
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "The Legend of Zelda");
 
     const char *texturePaths[TITLE_TEXTURE_COUNT] = {
-        "resources/title_background.png",
-        "resources/title_prompt.png",
-        "resources/waterfall_crest_0.png",
-        "resources/waterfall_crest_1.png",
-        "resources/waterfall_wave_0.png",
-        "resources/waterfall_wave_1.png",
-        "resources/waterfall_wave_2.png",
-        "resources/triforce_glow_mask.png",
-        "resources/triforce_occlusion.png"
+        "resources/textures/title_background.png",
+        "resources/textures/title_prompt.png",
+        "resources/textures/waterfall_crest_0.png",
+        "resources/textures/waterfall_crest_1.png",
+        "resources/textures/waterfall_wave_0.png",
+        "resources/textures/waterfall_wave_1.png",
+        "resources/textures/waterfall_wave_2.png",
+        "resources/textures/triforce_glow_mask.png",
+        "resources/textures/triforce_occlusion.png"
     };
     Texture2D textures[TITLE_TEXTURE_COUNT] = {0};
     for (int i = 0; i < TITLE_TEXTURE_COUNT; i++) {
@@ -42,7 +42,7 @@ int main()
         SetTextureFilter(textures[i], TEXTURE_FILTER_POINT);
     }
 
-    if (!StartTitleMusic("resources/title_music.nsf")) {
+    if (!StartTitleMusic("resources/audio/title_music.mp3")) {
         for (int i = 0; i < TITLE_TEXTURE_COUNT; i++) UnloadTexture(textures[i]);
         CloseWindow();
         return 1;
@@ -64,6 +64,7 @@ int main()
     SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
+        UpdateTitleMusic();
 
         frameAccumulator += GetFrameTime();
         while (frameAccumulator >= 1.0f / 60.0f) {
