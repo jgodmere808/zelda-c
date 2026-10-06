@@ -10,6 +10,7 @@ typedef enum {
 
 typedef struct {
     MenuScreen currentScreen;
+    TitleScreen titleScreen;
 } Menu;
 
 static Menu menu;
@@ -17,14 +18,15 @@ static Menu menu;
 void initMenu()
 {
     menu.currentScreen = TITLE_SCREEN;
+    menu.titleScreen = initTitleScreen();
 }
 
-void updateMenu()
+void updateAndDrawMenu()
 {
-    return;
-}
-
-void drawMenu()
-{
-    return;
+    switch (menu.currentScreen) {
+        case TITLE_SCREEN:
+            updateTitleScreen(&menu.titleScreen);
+            drawTitleScreen(&menu.titleScreen);
+            break;
+    }
 }
