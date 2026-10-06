@@ -1,0 +1,23 @@
+#pragma once
+
+#include "config.h"
+
+typedef enum {
+    /* TITLE SCREEN */
+    TEXTURE_TITLE_BACKGROUND,
+    TEXTURE_TITLE_PROMPT,
+    TEXTURE_WATERFALL_CREST_0,
+    TEXTURE_WATERFALL_CREST_1,
+    TEXTURE_WATERFALL_WAVE_0,
+    TEXTURE_WATERFALL_WAVE_1,
+    TEXTURE_WATERFALL_WAVE_2,
+    TEXTURE_TRIFORCE_GLOW_MASK,
+    TEXTURE_TRIFORCE_OCCLUSION,
+
+    TEXTURE_COUNT
+} TextureType;
+
+Texture2D textures[TEXTURE_COUNT];
+
+bool initTextureMap();
+void endTextureMap();

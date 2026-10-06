@@ -1,49 +1,20 @@
 
 #include "config.h"
 #include "audio.h"
-
-enum {
-    TITLE_BACKGROUND,
-    TITLE_PROMPT,
-    WATERFALL_CREST_0,
-    WATERFALL_CREST_1,
-    WATERFALL_WAVE_0,
-    WATERFALL_WAVE_1,
-    WATERFALL_WAVE_2,
-    TRIFORCE_GLOW_MASK,
-    TRIFORCE_OCCLUSION,
-    TITLE_TEXTURE_COUNT
-};
+#include "texture_map.h"
 
 int main()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "The Legend of Zelda");
 
-    const char *texturePaths[TITLE_TEXTURE_COUNT] = {
-        "resources/textures/title_background.png",
-        "resources/textures/title_prompt.png",
-        "resources/textures/waterfall_crest_0.png",
-        "resources/textures/waterfall_crest_1.png",
-        "resources/textures/waterfall_wave_0.png",
-        "resources/textures/waterfall_wave_1.png",
-        "resources/textures/waterfall_wave_2.png",
-        "resources/textures/triforce_glow_mask.png",
-        "resources/textures/triforce_occlusion.png"
-    };
-    Texture2D textures[TITLE_TEXTURE_COUNT] = {0};
-    for (int i = 0; i < TITLE_TEXTURE_COUNT; i++) {
-        textures[i] = LoadTexture(texturePaths[i]);
-        if (textures[i].id == 0) {
-            TraceLog(LOG_ERROR, "Could not load %s", texturePaths[i]);
-            for (int j = 0; j < i; j++) UnloadTexture(textures[j]);
-            CloseWindow();
-            return 1;
-        }
-        SetTextureFilter(textures[i], TEXTURE_FILTER_POINT);
+    if (!initTextureMap()) {
+        endTextureMap();
+        CloseWindow();
+        return 1;
     }
 
     if (!initAudio()) {
-        for (int i = 0; i < TITLE_TEXTURE_COUNT; i++) UnloadTexture(textures[i]);
+        endTextureMap();
         CloseWindow();
         return 1;
     }
@@ -81,26 +52,26 @@ int main()
         }
 
         BeginDrawing();
-            DrawTextureEx(textures[TITLE_BACKGROUND], (Vector2){0, 0}, 0, FACTOR, WHITE);
-            DrawTextureEx(textures[TRIFORCE_GLOW_MASK],
+            DrawTextureEx(textures[TEXTURE_TITLE_BACKGROUND], (Vector2){0, 0}, 0, FACTOR, WHITE);
+            DrawTextureEx(textures[TEXTURE_TRIFORCE_GLOW_MASK],
                           (Vector2){92 * FACTOR, 48 * FACTOR}, 0, FACTOR,
                           glowColors[glowPhase]);
-            DrawTextureEx(textures[TRIFORCE_OCCLUSION],
+            DrawTextureEx(textures[TEXTURE_TRIFORCE_OCCLUSION],
                           (Vector2){92 * FACTOR, 48 * FACTOR}, 0, FACTOR, WHITE);
-            DrawTextureEx(textures[WATERFALL_CREST_0 + ((frame & 8) != 0)],
+            DrawTextureEx(textures[TEXTURE_WATERFALL_CREST_0 + ((frame & 8) != 0)],
                           (Vector2){80 * FACTOR, 169 * FACTOR}, 0, FACTOR, WHITE);
             for (int i = 2; i >= 0; i--) {
                 int waveFrame = waveY[i] < 0xB9 ? 0 : (waveY[i] < 0xC2 ? 1 : 2);
-                DrawTextureEx(textures[WATERFALL_WAVE_0 + waveFrame],
+                DrawTextureEx(textures[TEXTURE_WATERFALL_WAVE_0 + waveFrame],
                               (Vector2){80 * FACTOR, (waveY[i] - 7) * FACTOR},
                               0, FACTOR, WHITE);
             }
-            DrawTextureEx(textures[TITLE_PROMPT],
+            DrawTextureEx(textures[TEXTURE_TITLE_PROMPT],
                           (Vector2){64 * FACTOR, 152 * FACTOR}, 0, FACTOR, WHITE);
         EndDrawing();
     }
 
     endAudio();
-    for (int i = 0; i < TITLE_TEXTURE_COUNT; i++) UnloadTexture(textures[i]);
+    endTextureMap();
     CloseWindow();
 }
