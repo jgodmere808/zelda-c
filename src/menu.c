@@ -13,3 +13,18 @@ typedef struct {
 } Menu;
 
 static Menu menu;
+
+void initMenu()
+{
+    menu.currentScreen = TITLE_SCREEN;
+}
+
+void updateMenu()
+{
+    return;
+}
+
+void drawMenu()
+{
+    return;
+}

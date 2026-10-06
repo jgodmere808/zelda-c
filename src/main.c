@@ -19,6 +19,8 @@ int main()
         return 1;
     }
 
+    initMenu();
+
     // NES palette values $27, $37, $17, and $07 in the source capture's palette.
     const Color glowColors[8] = {
         {252, 152, 56, 255}, {252, 216, 168, 255},
