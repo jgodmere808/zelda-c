@@ -1,8 +1,15 @@
-#ifndef AUDIO_H
-#define AUDIO_H
+#pragma once
 
-int StartTitleMusic(const char *path);
-void UpdateTitleMusic(void);
-void StopTitleMusic(void);
+#include "config.h"
 
-#endif
+typedef enum {
+    MUSIC_MAIN_THEME,
+    MUSIC_COUNT,
+    MUSIC_NONE
+} MusicType;
+
+bool initAudio();
+void endAudio();
+void changeMusic(MusicType type);
+void updateAudio();
+

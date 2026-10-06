@@ -42,7 +42,7 @@ int main()
         SetTextureFilter(textures[i], TEXTURE_FILTER_POINT);
     }
 
-    if (!StartTitleMusic("resources/audio/title_music.mp3")) {
+    if (!initAudio()) {
         for (int i = 0; i < TITLE_TEXTURE_COUNT; i++) UnloadTexture(textures[i]);
         CloseWindow();
         return 1;
@@ -64,7 +64,7 @@ int main()
     SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
-        UpdateTitleMusic();
+        updateAudio();
 
         frameAccumulator += GetFrameTime();
         while (frameAccumulator >= 1.0f / 60.0f) {
@@ -100,7 +100,7 @@ int main()
         EndDrawing();
     }
 
-    StopTitleMusic();
+    endAudio();
     for (int i = 0; i < TITLE_TEXTURE_COUNT; i++) UnloadTexture(textures[i]);
     CloseWindow();
 }

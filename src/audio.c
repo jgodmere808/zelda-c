@@ -1,43 +1,70 @@
 
 #include "audio.h"
 
-#include "raylib.h"
+typedef struct {
+    Music mainTheme;
+    MusicType type;
+    bool musicLoaded;
+} Audio;
 
-static Music titleMusic;
-static bool titleMusicLoaded = false;
+static Audio audio;
 
-int StartTitleMusic(const char *path)
+bool initAudio()
 {
     InitAudioDevice();
     if (!IsAudioDeviceReady()) {
-        TraceLog(LOG_ERROR, "Could not initialize audio device");
-        return 0;
+        fprintf(stderr, "Failed to initialize audio device");
+        return false;
     }
 
-    titleMusic = LoadMusicStream(path);
-    if (!IsMusicValid(titleMusic)) {
-        TraceLog(LOG_ERROR, "Could not load %s", path);
-        CloseAudioDevice();
-        return 0;
+    audio.mainTheme = LoadMusicStream("resources/audio/title_music.mp3");
+    if (!IsMusicValid(audio.mainTheme)) {
+        fprintf(stderr, "Failed to load audio main theme");
+        return false;
     }
 
-    titleMusicLoaded = true;
-    titleMusic.looping = true;
-    PlayMusicStream(titleMusic);
-    return 1;
+    audio.musicLoaded = true;
+    audio.mainTheme.looping = true;
+    audio.type = MUSIC_MAIN_THEME;
+    PlayMusicStream(audio.mainTheme);
+    return true;
 }
 
-void UpdateTitleMusic(void)
+void endAudio()
 {
-    if (titleMusicLoaded) UpdateMusicStream(titleMusic);
+    CloseAudioDevice();
 }
 
-void StopTitleMusic(void)
+void changeMusic(MusicType type)
 {
-    if (titleMusicLoaded) {
-        StopMusicStream(titleMusic);
-        UnloadMusicStream(titleMusic);
-        titleMusicLoaded = false;
+    if (!audio.musicLoaded) return;
+
+    // stop current music stream
+    switch (audio.type) {
+        case MUSIC_MAIN_THEME:
+            StopMusicStream(audio.mainTheme);
+            break;
+        default:
+            return;
     }
-    if (IsAudioDeviceReady()) CloseAudioDevice();
+
+    // play next music stream
+    switch (type) {
+        case MUSIC_MAIN_THEME:
+            PlayMusicStream(audio.mainTheme);
+            audio.type = type;
+            break;
+    }
+}
+
+void updateAudio()
+{
+    if (!audio.musicLoaded) return;
+
+    switch (audio.type) {
+        case MUSIC_MAIN_THEME:
+            if (!IsMusicStreamPlaying(audio.mainTheme)) break;
+            UpdateMusicStream(audio.mainTheme);
+            break;
+    }
 }

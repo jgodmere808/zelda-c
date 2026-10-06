@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdio.h>
+#include <stdbool.h>
+
 #include "raylib.h"
 
 #define FACTOR 3
