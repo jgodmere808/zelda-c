@@ -15,6 +15,10 @@ typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
 
 typedef struct {
     MapScreen mapScreens[MAP_ROWS][MAP_COLS];
+    int currentMapRow;
+    int currentMapCol;
+    MapScreen currentScreen;
+    MapScreen nextScreen;
 } Map;
 
 static Map map;
@@ -120,19 +124,54 @@ bool initMap()
 
             if (!loaded) {
                 fprintf(stderr, "Invalid map screen: %s\n", path);
+                return false;
             }
         }
     }
 
+    map.currentMapRow = 0;
+    map.currentMapCol = 0;
+
     return true;
 }
 
-void loadMap()
+void loadMapScreen(SpawnLocation spawnLocation)
+{
+    int mapRow, mapCol, screenRow, screenCol;
+
+    switch (spawnLocation) {
+        case SPAWN_GAME_START:
+            mapRow = 7;
+            mapCol = 7;
+            break;
+        default:
+            mapRow = 0;
+            mapCol = 0;
+            break;
+    }
+
+    map.currentMapRow = mapRow;
+    map.currentMapCol = mapCol;
+
+    for (screenRow = 0; screenRow < MAP_SCREEN_ROWS; screenRow++) {
+        for (screenCol = 0; screenCol < MAP_SCREEN_COLS; screenCol++) {
+            map.currentScreen[screenRow][screenCol] = 
+                map.mapScreens[mapRow][mapCol][screenRow][screenCol];
+        }
+    }
+}
+
+void transitionMap()
 {
     return;
 }
 
-void transitionMap()
+void updateMap()
+{
+    return;
+}
+
+void drawMap()
 {
     return;
 }

@@ -2,6 +2,10 @@
 
 #include "config.h"
 
+typedef enum {
+    SPAWN_GAME_START
+} SpawnLocation;
+
 bool initMap();
-void loadMap();
+void loadMapScreen(SpawnLocation spawnLocation);
 void transitionMap();
