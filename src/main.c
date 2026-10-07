@@ -4,6 +4,7 @@
 #include "texture_map.h"
 #include "menu.h"
 #include "game.h"
+#include "map.h"
 
 int main()
 {
@@ -16,6 +17,12 @@ int main()
     }
 
     if (!initAudio()) {
+        endTextureMap();
+        CloseWindow();
+        return 1;
+    }
+
+    if (!initMap()) {
         endTextureMap();
         CloseWindow();
         return 1;

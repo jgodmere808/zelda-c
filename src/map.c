@@ -1,0 +1,138 @@
+
+#include "map.h"
+
+#define MAP_ROWS  8
+#define MAP_COLS 16
+
+#define MAP_SCREEN_ROWS 11
+#define MAP_SCREEN_COLS 16
+
+#define MAP_ATLAS_TILE_COUNT (18 * 8)
+
+#define MAP_SCREEN_PATH "map/overworld/row_%02d/screen_x%02d_y%02d.txt"
+
+typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
+
+typedef struct {
+    MapScreen mapScreens[MAP_ROWS][MAP_COLS];
+} Map;
+
+static Map map;
+
+static bool readContentLine(FILE *file, char *line, size_t size)
+{
+    while (fgets(line, size, file) != NULL) {
+        char *p = line;
+
+        while (isspace((unsigned char)*p)) p++;
+        
+        if (*p != '\0' && *p != '#') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool initMapScreen(FILE *file, int mapRow, int mapCol)
+{
+    char line[128];
+    int fileCol, fileRow;
+    char extra;
+
+    if (!readContentLine(file, line, sizeof line) ||
+        sscanf(line, "screen %d %d %c", &fileCol, &fileRow, &extra) != 2 ||
+        fileCol != mapCol || fileRow != mapRow) {
+        return false;
+    }
+
+    for (int screenRow = 0; screenRow < MAP_SCREEN_ROWS; screenRow++) {
+        if (!readContentLine(file, line, sizeof line)) {
+            return false;
+        }
+
+        char *p = line;
+
+        for (int screenCol = 0; screenCol < MAP_SCREEN_COLS; screenCol++) {
+            char *end;
+
+            while (isspace((unsigned char)*p)) {
+                p++;
+            }
+
+            if (!isxdigit((unsigned char)p[0]) ||
+                !isxdigit((unsigned char)p[1])) {
+                return false;
+            }
+
+            unsigned long tileId = strtoul(p, &end, 16);
+
+            if (end - p != 2 ||
+                tileId >= MAP_ATLAS_TILE_COUNT ||
+                (*end != '\0' && !isspace((unsigned char)*end))) {
+                return false;
+            }
+
+            map.mapScreens[mapRow][mapCol][screenRow][screenCol] =
+                (unsigned char)tileId;
+            p = end;
+        }
+
+        while (isspace((unsigned char)*p)) {
+            p++;
+        }
+
+        if (*p != '\0') {
+            return false;  /* More than 16 IDs on this row. */
+        }
+    }
+
+    /* Reject extra non-comment data after the 11 tile rows. */
+    return !readContentLine(file, line, sizeof line) && !ferror(file);
+}
+
+bool initMap()
+{
+    FILE *file;
+    int row, col, length;
+    char path[64];
+    bool loaded;
+
+    // load the map
+    for (row = 0; row < MAP_ROWS; row++) {
+        for (col = 0; col < MAP_COLS; col++) {
+            length = snprintf(
+                path, sizeof(path), MAP_SCREEN_PATH, row, col, row
+            );
+
+            if (length < 0 || (size_t)length >= sizeof(path)) {
+                return false;
+            }
+
+            file = fopen(path, "r");
+            if (file == NULL) {
+                perror(path);
+                return false;
+            }
+
+            loaded = initMapScreen(file, row, col);
+            fclose(file);
+
+            if (!loaded) {
+                fprintf(stderr, "Invalid map screen: %s\n", path);
+            }
+        }
+    }
+
+    return true;
+}
+
+void loadMap()
+{
+    return;
+}
+
+void transitionMap()
+{
+    return;
+}

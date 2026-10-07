@@ -4,6 +4,8 @@
 #include <time.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #include "raylib.h"
 
