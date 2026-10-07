@@ -13,17 +13,11 @@ typedef struct {
     int keyboardRow;
     int keyboardColumn;
     bool saveFailed;
-    Texture2D background;
-    Texture2D font;
-    Texture2D link;
-    Texture2D redHeart;
-    Texture2D redSelection;
 } RegisterModeScreen;
 
 RegisterModeScreen initRegisterModeScreen(void);
 void updateRegisterModeScreen(RegisterModeScreen *screen);
 void drawRegisterModeScreen(const RegisterModeScreen *screen);
-void unloadRegisterModeScreen(RegisterModeScreen *screen);
 
 const char *getRegisteredName(const RegisterModeScreen *screen, int slot);
 bool setRegisteredName(RegisterModeScreen *screen, int slot, const char *name);

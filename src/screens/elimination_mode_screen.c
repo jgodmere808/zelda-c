@@ -1,6 +1,7 @@
 #include "elimination_mode_screen.h"
 
 #include "../menu.h"
+#include "../texture_map.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -8,12 +9,6 @@
 enum { END_ENTRY = ELIMINATION_MODE_SLOT_COUNT, ENTRY_COUNT = END_ENTRY + 1 };
 static const char *const SAVE_PATH = "zelda_register_names.txt";
 static const char *const TEMP_SAVE_PATH = "zelda_register_names.txt.tmp";
-
-static bool pressed(int key, int gamepadButton)
-{
-    return IsKeyPressed(key) ||
-           (IsGamepadAvailable(0) && IsGamepadButtonPressed(0, gamepadButton));
-}
 
 static int glyphIndex(char character)
 {
@@ -31,16 +26,16 @@ static int glyphIndex(char character)
     }
 }
 
-static void drawGlyph(const EliminationModeScreen *screen, char character,
-                      int x, int y, Color tint)
+static void drawGlyph(char character, int x, int y, Color tint)
 {
     int index = glyphIndex(character);
-    if (index < 0 || screen->font.id == 0) return;
+    if (index < 0 || textures[TEXTURE_MENU_FONT].id == 0) return;
 
     Rectangle source = {(float)((index % 16) * 8), (float)((index / 16) * 8), 8, 8};
     Rectangle destination = {(float)(x * FACTOR), (float)(y * FACTOR),
                              8 * FACTOR, 8 * FACTOR};
-    DrawTexturePro(screen->font, source, destination, (Vector2){0, 0}, 0, tint);
+    DrawTexturePro(textures[TEXTURE_MENU_FONT], source, destination,
+                   (Vector2){0, 0}, 0, tint);
 }
 
 static bool readSavedNames(char names[ELIMINATION_MODE_SLOT_COUNT]
@@ -93,18 +88,6 @@ void refreshEliminationModeScreen(EliminationModeScreen *screen)
 EliminationModeScreen initEliminationModeScreen(void)
 {
     EliminationModeScreen screen = {0};
-    screen.background = LoadTexture("resources/textures/menu/elimination_background.png");
-    screen.font = LoadTexture("resources/textures/menu/font_8x8.png");
-    screen.link = LoadTexture("resources/textures/menu/link_green.png");
-    screen.whiteHeart = LoadTexture("resources/textures/menu/life_heart_empty.png");
-
-    Texture2D *const textures[] = {
-        &screen.background, &screen.font, &screen.link, &screen.whiteHeart
-    };
-    for (int i = 0; i < 4; i++) {
-        if (textures[i]->id != 0) SetTextureFilter(*textures[i], TEXTURE_FILTER_POINT);
-    }
-
     refreshEliminationModeScreen(&screen);
     return screen;
 }
@@ -143,9 +126,8 @@ void updateEliminationModeScreen(EliminationModeScreen *screen)
     if (!screen) return;
     refreshEliminationModeScreen(screen);
 
-    /* B/Escape cancels changes before ELIMINATION END is selected. */
-    if (IsKeyPressed(KEY_ESCAPE) ||
-        pressed(KEY_X, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)) {
+    /* Escape or X cancels changes before ELIMINATION END is selected. */
+    if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_X)) {
         for (int slot = 0; slot < ELIMINATION_MODE_SLOT_COUNT; slot++) {
             screen->markedForDeletion[slot] = false;
         }
@@ -153,14 +135,14 @@ void updateEliminationModeScreen(EliminationModeScreen *screen)
         return;
     }
 
-    if (pressed(KEY_TAB, GAMEPAD_BUTTON_MIDDLE_LEFT) || IsKeyPressed(KEY_SPACE) ||
-        pressed(KEY_DOWN, GAMEPAD_BUTTON_LEFT_FACE_DOWN)) {
+    if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_SPACE) ||
+        IsKeyPressed(KEY_DOWN)) {
         screen->selectedEntry = (screen->selectedEntry + 1) % ENTRY_COUNT;
-    } else if (pressed(KEY_UP, GAMEPAD_BUTTON_LEFT_FACE_UP)) {
+    } else if (IsKeyPressed(KEY_UP)) {
         screen->selectedEntry = (screen->selectedEntry + ENTRY_COUNT - 1) % ENTRY_COUNT;
     }
 
-    if (!pressed(KEY_ENTER, GAMEPAD_BUTTON_MIDDLE_RIGHT)) return;
+    if (!IsKeyPressed(KEY_ENTER)) return;
 
     if (screen->selectedEntry < ELIMINATION_MODE_SLOT_COUNT) {
         int slot = screen->selectedEntry;
@@ -186,46 +168,36 @@ void updateEliminationModeScreen(EliminationModeScreen *screen)
 void drawEliminationModeScreen(const EliminationModeScreen *screen)
 {
     if (!screen) return;
-    if (screen->background.id != 0) {
-        DrawTextureEx(screen->background, (Vector2){0, 0}, 0, FACTOR, WHITE);
+    if (textures[TEXTURE_ELIMINATION_BACKGROUND].id != 0) {
+        DrawTextureEx(textures[TEXTURE_ELIMINATION_BACKGROUND],
+                      (Vector2){0, 0}, 0, FACTOR, WHITE);
     }
 
     for (int slot = 0; slot < ELIMINATION_MODE_SLOT_COUNT; slot++) {
         int y = 51 + slot * 21;
-        if (screen->link.id != 0) {
-            DrawTextureEx(screen->link, (Vector2){85 * FACTOR, y * FACTOR},
+        if (textures[TEXTURE_LINK_GREEN].id != 0) {
+            DrawTextureEx(textures[TEXTURE_LINK_GREEN],
+                          (Vector2){85 * FACTOR, y * FACTOR},
                           0, FACTOR, WHITE);
         }
         if (!screen->markedForDeletion[slot]) {
             for (int i = 0; screen->names[slot][i] != '\0'; i++) {
-                drawGlyph(screen, screen->names[slot][i], 116 + i * 8, y, WHITE);
+                drawGlyph(screen->names[slot][i], 116 + i * 8, y, WHITE);
             }
         }
     }
 
-    if (screen->whiteHeart.id != 0) {
+    if (textures[TEXTURE_LIFE_HEART_EMPTY].id != 0) {
         int heartY = screen->selectedEntry == END_ENTRY ?
                      111 : 52 + screen->selectedEntry * 21;
-        DrawTextureEx(screen->whiteHeart,
+        DrawTextureEx(textures[TEXTURE_LIFE_HEART_EMPTY],
                       (Vector2){70 * FACTOR, heartY * FACTOR}, 0, FACTOR, WHITE);
     }
 
     if (screen->saveFailed) {
         const char *message = "SAVE FAILED";
         for (int i = 0; message[i]; i++) {
-            drawGlyph(screen, message[i], 84 + i * 8, 191, RED);
+            drawGlyph(message[i], 84 + i * 8, 191, RED);
         }
-    }
-}
-
-void unloadEliminationModeScreen(EliminationModeScreen *screen)
-{
-    if (!screen) return;
-    Texture2D *const textures[] = {
-        &screen->background, &screen->font, &screen->link, &screen->whiteHeart
-    };
-    for (int i = 0; i < 4; i++) {
-        if (textures[i]->id != 0) UnloadTexture(*textures[i]);
-        *textures[i] = (Texture2D){0};
     }
 }

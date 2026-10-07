@@ -10,16 +10,11 @@ typedef struct {
     bool markedForDeletion[ELIMINATION_MODE_SLOT_COUNT];
     int selectedEntry; /* 0-2 are files; 3 is ELIMINATION END. */
     bool saveFailed;
-    Texture2D background;
-    Texture2D font;
-    Texture2D link;
-    Texture2D whiteHeart;
 } EliminationModeScreen;
 
 EliminationModeScreen initEliminationModeScreen(void);
 void refreshEliminationModeScreen(EliminationModeScreen *screen);
 void updateEliminationModeScreen(EliminationModeScreen *screen);
 void drawEliminationModeScreen(const EliminationModeScreen *screen);
-void unloadEliminationModeScreen(EliminationModeScreen *screen);
 
 bool eliminationModeSlotMarked(const EliminationModeScreen *screen, int slot);
