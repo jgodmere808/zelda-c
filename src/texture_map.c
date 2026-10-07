@@ -26,7 +26,9 @@ bool initTextureMap()
         "resources/textures/menu/life_heart_full.png",
         "resources/textures/menu/life_heart_half.png",
         "resources/textures/menu/life_heart_empty.png",
-        "resources/textures/menu/selection_tile_red.png"
+        "resources/textures/menu/selection_tile_red.png",
+        "resources/textures/overworld/tiles_16x16.png",
+        "resources/textures/characters/link_spritesheet.png"
     };
 
     for (i = 0; i < TEXTURE_COUNT; i++) {
