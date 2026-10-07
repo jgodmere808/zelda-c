@@ -6,7 +6,7 @@ static char *getSavePath(SaveRegister saveRegister)
 {
     switch (saveRegister) {
         case SAVE_REGISTER_1:
-            return "saves/register_1.bin"
+            return "saves/register_1.bin";
         case SAVE_REGISTER_2:
             return "saves/register_2.bin";
         case SAVE_REGISTER_3:
@@ -20,10 +20,10 @@ bool loadSave(SaveRegister saveRegister, GameState *gameState)
     if (!file) return false;
 
     GameState loaded;
-    bool of = fread(&loaded, sizeof(loaded), 1, file) == 1;
+    bool ok = fread(&loaded, sizeof(loaded), 1, file) == 1;
     if (fclose(file) != 0) ok = false;
 
-    if (ok) *state = loaded;
+    if (ok) *gameState = loaded;
     return ok;
 }
 
@@ -32,7 +32,7 @@ bool storeSave(SaveRegister saveRegister, GameState *gameState)
     FILE *file = fopen(getSavePath(saveRegister), "wb");
     if (!file) return false;
 
-    bool ok = fwrite(gameState, sizeof(*state), 1, file) == 1;
+    bool ok = fwrite(gameState, sizeof(*gameState), 1, file) == 1;
     if (fclose(file) != 0) ok = false;
 
     return ok;
