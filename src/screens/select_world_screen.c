@@ -1,13 +1,13 @@
 #include "select_world_screen.h"
 
+#include "../game.h"
 #include "../menu.h"
+#include "../save.h"
 #include "../texture_map.h"
 
-#include <stdio.h>
 #include <string.h>
 
 enum { REGISTER_ENTRY = 3, ELIMINATION_ENTRY = 4, ENTRY_COUNT = 5 };
-static const char *const SAVE_PATH = "zelda_register_names.txt";
 
 static int glyphIndex(char character)
 {
@@ -66,19 +66,12 @@ void refreshSelectWorldScreen(SelectWorldScreen *screen)
     if (!screen) return;
 
     char names[SELECT_WORLD_SLOT_COUNT][SELECT_WORLD_NAME_LENGTH + 1] = {{0}};
-    FILE *file = fopen(SAVE_PATH, "r");
-    if (file) {
-        char line[64];
-        if (!fgets(line, sizeof line, file) || strcmp(line, "ZELDA-REGISTER-1\n") != 0) {
-            fclose(file);
-            return;
+    for (int slot = 0; slot < SELECT_WORLD_SLOT_COUNT; slot++) {
+        GameState saved = {0};
+        if (loadSave((SaveRegister)slot, &saved)) {
+            saved.name[SELECT_WORLD_NAME_LENGTH] = '\0';
+            if (validName(saved.name)) strcpy(names[slot], saved.name);
         }
-        for (int slot = 0; slot < SELECT_WORLD_SLOT_COUNT; slot++) {
-            if (!fgets(line, sizeof line, file)) break;
-            line[strcspn(line, "\r\n")] = '\0';
-            if (validName(line)) strcpy(names[slot], line);
-        }
-        fclose(file);
     }
 
     int changedSlot = -1;
@@ -157,9 +150,6 @@ void updateSelectWorldScreen(SelectWorldScreen *screen)
     } else if (screen->selectedEntry == ELIMINATION_ENTRY) {
         screen->chosenSlot = -1;
         changeMenu(ELIMINATION_MODE_SCREEN);
-    } else if (screen->names[screen->selectedEntry][0] != '\0') {
-        screen->chosenSlot = screen->selectedEntry;
-        changeMenu(GAME_SCREEN);
     }
 }
 
