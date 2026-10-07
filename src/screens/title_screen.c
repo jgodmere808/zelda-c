@@ -28,6 +28,10 @@ TitleScreen initTitleScreen()
 
 void updateTitleScreen(TitleScreen *titleScreen)
 {
+    if (IsKeyPressed(KEY_ENTER)) {
+        changeMenu(SELECT_WORLD_SCREEN);
+    }
+
     titleScreen->frameAccumulator += GetFrameTime();
 
     while (titleScreen->frameAccumulator >= 1.0f / 60.0f) {

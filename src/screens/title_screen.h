@@ -2,6 +2,7 @@
 
 #include "../config.h"
 #include "../texture_map.h"
+#include "../menu.h"
 
 typedef struct {
     Color glowColors[8];

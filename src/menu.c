@@ -1,16 +1,12 @@
 
 #include "menu.h"
 
-typedef enum {
-    TITLE_SCREEN,
-    SELECT_WORLD,
-    REGISTER_MODE,
-    ELIMINATION_MODE
-} MenuScreen;
-
 typedef struct {
     MenuScreen currentScreen;
     TitleScreen titleScreen;
+    SelectWorldScreen selectWorldScreen;
+    RegisterModeScreen registerModeScreen;
+    EliminationModeScreen eliminationModeScreen;
 } Menu;
 
 static Menu menu;
@@ -19,6 +15,19 @@ void initMenu()
 {
     menu.currentScreen = TITLE_SCREEN;
     menu.titleScreen = initTitleScreen();
+    menu.selectWorldScreen = initSelectWorldScreen();
+    menu.registerModeScreen = initRegisterModeScreen();
+    menu.eliminationModeScreen = initEliminationModeScreen();
+}
+
+MenuScreen getMenu()
+{
+    return menu.currentScreen;
+}
+
+void changeMenu(MenuScreen nextScreen)
+{
+    menu.currentScreen = nextScreen;
 }
 
 void updateAndDrawMenu()
@@ -27,6 +36,20 @@ void updateAndDrawMenu()
         case TITLE_SCREEN:
             updateTitleScreen(&menu.titleScreen);
             drawTitleScreen(&menu.titleScreen);
+            break;
+        case SELECT_WORLD_SCREEN:
+            updateSelectWorldScreen(&menu.selectWorldScreen);
+            drawSelectWorldScreen(&menu.selectWorldScreen);
+            break;
+        case REGISTER_MODE_SCREEN:
+            updateRegisterModeScreen(&menu.registerModeScreen);
+            drawRegisterModeScreen(&menu.registerModeScreen);
+            break;
+        case ELIMINATION_MODE_SCREEN:
+            updateEliminationModeScreen(&menu.eliminationModeScreen);
+            drawEliminationModeScreen(&menu.eliminationModeScreen);
+            break;
+        default:
             break;
     }
 }

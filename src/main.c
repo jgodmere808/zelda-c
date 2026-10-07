@@ -22,8 +22,6 @@ int main()
 
     initMenu();
 
-    bool inMenu = true;
-
     SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
@@ -32,12 +30,13 @@ int main()
         BeginDrawing();
             ClearBackground(WHITE);
 
-            if (inMenu) {
-                updateAndDrawMenu();
-            } else {
+            if (getMenu() == GAME_SCREEN) {
                 // update game
                 // draw game
+            } else {
+                updateAndDrawMenu();
             }
+
         EndDrawing();
     }
 
