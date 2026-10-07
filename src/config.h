@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <time.h>
 #include <stdbool.h>
 
 #include "raylib.h"
