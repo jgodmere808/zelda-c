@@ -144,7 +144,13 @@ void updateSelectWorldScreen(SelectWorldScreen *screen)
 
     if (!IsKeyPressed(KEY_ENTER)) return;
 
-    if (screen->selectedEntry == REGISTER_ENTRY) {
+    if (screen->selectedEntry < SELECT_WORLD_SLOT_COUNT) {
+        int slot = screen->selectedEntry;
+        if (loadSave((SaveRegister)slot, &gameState)) {
+            screen->chosenSlot = slot;
+            changeMenu(GAME_SCREEN);
+        }
+    } else if (screen->selectedEntry == REGISTER_ENTRY) {
         screen->chosenSlot = -1;
         changeMenu(REGISTER_MODE_SCREEN);
     } else if (screen->selectedEntry == ELIMINATION_ENTRY) {
