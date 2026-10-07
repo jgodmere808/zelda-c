@@ -1,18 +1,31 @@
-
 #include "register_mode_screen.h"
 
+#include "../game.h"
 #include "../menu.h"
+#include "../save.h"
 #include "../texture_map.h"
 
-#include <stdio.h>
 #include <string.h>
 
-static const char *const SAVE_PATH = "zelda_register_names.txt";
-static const char *const TEMP_SAVE_PATH = "zelda_register_names.txt.tmp";
+enum { NAME_LENGTH = 8 };
+
 static const char *const KEYBOARD_ROWS[4] = {
     "ABCDEFGHIJK", "LMNOPQRSTUV", "WXYZ-.,!'&.", "0123456789"
 };
 static const int KEYBOARD_ROW_LENGTHS[4] = {11, 11, 11, 10};
+static struct {
+    char names[REGISTER_MODE_SLOT_COUNT][NAME_LENGTH + 1];
+    int positions[REGISTER_MODE_SLOT_COUNT];
+    int editingSlot;
+} registration;
+
+static int nextAvailableSlot(void)
+{
+    for (int slot = 0; slot < REGISTER_MODE_SLOT_COUNT; slot++) {
+        if (registration.names[slot][0] == '\0') return slot;
+    }
+    return REGISTER_MODE_SLOT_COUNT;
+}
 
 static int glyphIndex(char character)
 {
@@ -42,117 +55,56 @@ static void drawGlyph(char character, int x, int y, Color tint)
                    (Vector2){0, 0}, 0, tint);
 }
 
-static void loadSavedNames(RegisterModeScreen *screen)
-{
-    FILE *file = fopen(SAVE_PATH, "r");
-    if (!file) return;
-
-    char line[64];
-    if (!fgets(line, sizeof line, file) || strcmp(line, "ZELDA-REGISTER-1\n") != 0) {
-        fclose(file);
-        return;
-    }
-    for (int slot = 0; slot < REGISTER_MODE_SLOT_COUNT; slot++) {
-        if (!fgets(line, sizeof line, file)) break;
-        line[strcspn(line, "\r\n")] = '\0';
-        setRegisteredName(screen, slot, line);
-    }
-    fclose(file);
-}
-
 RegisterModeScreen initRegisterModeScreen(void)
 {
     RegisterModeScreen screen = {0};
-    loadSavedNames(&screen);
+    memset(&registration, 0, sizeof registration);
+    for (int slot = 0; slot < REGISTER_MODE_SLOT_COUNT; slot++) {
+        GameState saved;
+        if (loadSave((SaveRegister)slot, &saved)) {
+            saved.name[NAME_LENGTH] = '\0';
+            strcpy(registration.names[slot], saved.name);
+        }
+    }
+    registration.editingSlot = nextAvailableSlot();
+    screen.selectedSlot = registration.editingSlot;
     return screen;
 }
 
-const char *getRegisteredName(const RegisterModeScreen *screen, int slot)
+static void enterCharacter(int slot, char character)
 {
-    if (!screen || slot < 0 || slot >= REGISTER_MODE_SLOT_COUNT) return NULL;
-    return screen->names[slot];
-}
-
-bool setRegisteredName(RegisterModeScreen *screen, int slot, const char *name)
-{
-    if (!screen || !name || slot < 0 || slot >= REGISTER_MODE_SLOT_COUNT) return false;
-
-    size_t length = strlen(name);
-    if (length > REGISTER_MODE_NAME_LENGTH) return false;
-    for (size_t i = 0; i < length; i++) {
-        if (glyphIndex(name[i]) < 0) return false;
-    }
-
-    memset(screen->names[slot], 0, sizeof screen->names[slot]);
-    memcpy(screen->names[slot], name, length);
-    screen->nameLengths[slot] = (int)length;
-    screen->namePositions[slot] = (int)length % REGISTER_MODE_NAME_LENGTH;
-    return true;
-}
-
-bool saveRegisteredNames(const RegisterModeScreen *screen)
-{
-    if (!screen) return false;
-
-    FILE *file = fopen(TEMP_SAVE_PATH, "w");
-    if (!file) return false;
-
-    bool written = fputs("ZELDA-REGISTER-1\n", file) >= 0;
-    for (int slot = 0; slot < REGISTER_MODE_SLOT_COUNT && written; slot++) {
-        written = fprintf(file, "%.*s\n", screen->nameLengths[slot],
-                          screen->names[slot]) >= 0;
-    }
-    if (fclose(file) != 0) written = false;
-    if (!written || rename(TEMP_SAVE_PATH, SAVE_PATH) != 0) {
-        remove(TEMP_SAVE_PATH);
-        return false;
-    }
-    return true;
-}
-
-bool registeredNameStartsSecondQuest(const RegisterModeScreen *screen, int slot)
-{
-    const char *name = getRegisteredName(screen, slot);
-    return name && strcmp(name, "ZELDA") == 0;
-}
-
-static void enterCharacter(RegisterModeScreen *screen, char character)
-{
-    int slot = screen->selectedSlot;
     if (slot >= REGISTER_MODE_SLOT_COUNT) return;
 
-    int position = screen->namePositions[slot];
-    screen->names[slot][position] = character;
-    if (position >= screen->nameLengths[slot]) {
-        screen->nameLengths[slot] = position + 1;
-        screen->names[slot][screen->nameLengths[slot]] = '\0';
-    }
-    screen->namePositions[slot] = (position + 1) % REGISTER_MODE_NAME_LENGTH;
+    int position = registration.positions[slot];
+    char *name = registration.names[slot];
+    int length = (int)strlen(name);
+    name[position] = character;
+    if (position >= length) name[position + 1] = '\0';
+    registration.positions[slot] = (position + 1) % NAME_LENGTH;
 }
 
-static void erasePreviousCharacter(RegisterModeScreen *screen)
+static void erasePreviousCharacter(int slot)
 {
-    int slot = screen->selectedSlot;
     if (slot >= REGISTER_MODE_SLOT_COUNT) return;
 
-    int position = (screen->namePositions[slot] + REGISTER_MODE_NAME_LENGTH - 1)
-                   % REGISTER_MODE_NAME_LENGTH;
-    screen->namePositions[slot] = position;
-    screen->names[slot][position] = ' ';
-    while (screen->nameLengths[slot] > 0 &&
-           screen->names[slot][screen->nameLengths[slot] - 1] == ' ') {
-        screen->nameLengths[slot]--;
-    }
-    screen->names[slot][screen->nameLengths[slot]] = '\0';
+    char *name = registration.names[slot];
+    if (name[0] == '\0') return;
+
+    int position = (registration.positions[slot] + NAME_LENGTH - 1) % NAME_LENGTH;
+    registration.positions[slot] = position;
+    name[position] = ' ';
+    int length = (int)strlen(name);
+    while (length > 0 && name[length - 1] == ' ') length--;
+    name[length] = '\0';
 }
 
 void updateRegisterModeScreen(RegisterModeScreen *screen)
 {
     if (!screen) return;
 
-    /* Tab or Space moves the heart through the three files and REGISTER END. */
     if (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_SPACE)) {
-        screen->selectedSlot = (screen->selectedSlot + 1) % 4;
+        screen->selectedSlot = screen->selectedSlot == REGISTER_MODE_SLOT_COUNT ?
+                               registration.editingSlot : REGISTER_MODE_SLOT_COUNT;
     }
 
     if (IsKeyPressed(KEY_UP)) {
@@ -172,19 +124,39 @@ void updateRegisterModeScreen(RegisterModeScreen *screen)
                                  KEYBOARD_ROW_LENGTHS[screen->keyboardRow];
     }
 
-    /* Z or A writes a glyph; X or B advances past a space. */
-    if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_A)) {
-        enterCharacter(screen, KEYBOARD_ROWS[screen->keyboardRow][screen->keyboardColumn]);
+    if (screen->selectedSlot < REGISTER_MODE_SLOT_COUNT &&
+        (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_ENTER))) {
+        enterCharacter(screen->selectedSlot,
+                       KEYBOARD_ROWS[screen->keyboardRow][screen->keyboardColumn]);
+        screen->saveFailed = false;
     }
-    if (IsKeyPressed(KEY_X) || IsKeyPressed(KEY_B)) {
-        enterCharacter(screen, ' ');
+    if (screen->selectedSlot < REGISTER_MODE_SLOT_COUNT &&
+        (IsKeyPressed(KEY_X) || IsKeyPressed(KEY_B))) {
+        enterCharacter(screen->selectedSlot, ' ');
+        screen->saveFailed = false;
     }
-    if (IsKeyPressed(KEY_BACKSPACE)) erasePreviousCharacter(screen);
+    if (screen->selectedSlot < REGISTER_MODE_SLOT_COUNT &&
+        IsKeyPressed(KEY_BACKSPACE)) {
+        erasePreviousCharacter(screen->selectedSlot);
+        screen->saveFailed = false;
+    }
 
-    if (IsKeyPressed(KEY_ENTER) &&
-        screen->selectedSlot == REGISTER_MODE_SLOT_COUNT) {
-        screen->saveFailed = !saveRegisteredNames(screen);
-        if (!screen->saveFailed) changeMenu(SELECT_WORLD_SCREEN);
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        screen->saveFailed = false;
+        screen->selectedSlot = registration.editingSlot;
+        changeMenu(SELECT_WORLD_SCREEN);
+    } else if (IsKeyPressed(KEY_ENTER) &&
+               screen->selectedSlot == REGISTER_MODE_SLOT_COUNT) {
+        int slot = registration.editingSlot;
+        if (slot < REGISTER_MODE_SLOT_COUNT && registration.names[slot][0] != '\0') {
+            resetGameState();
+            strcpy(gameState.name, registration.names[slot]);
+            screen->saveFailed = !storeSave((SaveRegister)slot, &gameState);
+            if (screen->saveFailed) return;
+            registration.editingSlot = nextAvailableSlot();
+        }
+        screen->selectedSlot = registration.editingSlot;
+        changeMenu(SELECT_WORLD_SCREEN);
     }
 }
 
@@ -205,11 +177,11 @@ void drawRegisterModeScreen(const RegisterModeScreen *screen)
         }
         if (slot == screen->selectedSlot && textures[TEXTURE_SELECTION_TILE_RED].id != 0) {
             DrawTextureEx(textures[TEXTURE_SELECTION_TILE_RED],
-                          (Vector2){(116 + 8 * screen->namePositions[slot]) * FACTOR,
+                          (Vector2){(116 + 8 * registration.positions[slot]) * FACTOR,
                                     y * FACTOR}, 0, FACTOR, WHITE);
         }
-        for (int i = 0; i < screen->nameLengths[slot]; i++) {
-            drawGlyph(screen->names[slot][i], 116 + i * 8, y, WHITE);
+        for (int i = 0; registration.names[slot][i] != '\0'; i++) {
+            drawGlyph(registration.names[slot][i], 116 + i * 8, y, WHITE);
         }
     }
 
@@ -231,7 +203,7 @@ void drawRegisterModeScreen(const RegisterModeScreen *screen)
 
     if (screen->saveFailed) {
         const char *message = "SAVE FAILED";
-        for (int i = 0; message[i]; i++) {
+        for (int i = 0; message[i] != '\0'; i++) {
             drawGlyph(message[i], 84 + i * 8, 191, RED);
         }
     }

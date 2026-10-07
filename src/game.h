@@ -3,6 +3,12 @@
 #include "config.h"
 
 typedef struct {
-    int heartCount;
-    float health;
+    char name[9];
 } GameState;
+
+extern GameState gameState;
+
+void resetGameState();
+void initGame();
+void updateGame();
+void drawGame();

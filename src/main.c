@@ -3,6 +3,7 @@
 #include "audio.h"
 #include "texture_map.h"
 #include "menu.h"
+#include "game.h"
 
 int main()
 {
@@ -21,6 +22,7 @@ int main()
     }
 
     initMenu();
+    initGame();
 
     SetTargetFPS(60);
 
@@ -31,8 +33,8 @@ int main()
             ClearBackground(WHITE);
 
             if (getMenu() == GAME_SCREEN) {
-                // update game
-                // draw game
+                updateGame();
+                drawGame();
             } else {
                 updateAndDrawMenu();
             }
