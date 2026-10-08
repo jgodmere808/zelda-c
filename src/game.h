@@ -1,6 +1,8 @@
 #pragma once
 
 #include "config.h"
+#include "map.h"
+#include "link.h"
 
 typedef struct {
     char name[9];

@@ -173,5 +173,42 @@ void updateMap()
 
 void drawMap()
 {
-    return;
+    int tileHeight;
+    unsigned char tileId;
+    int screenRow, screenCol;
+    int atlasRow, atlasCol, sourceX, sourceY;
+
+    for (screenRow = 0; screenRow < MAP_SCREEN_ROWS; screenRow++) {
+        for (screenCol = 0; screenCol < MAP_SCREEN_COLS; screenCol++) {
+            tileId = map.currentScreen[screenRow][screenCol];
+
+            atlasCol = tileId % 18;
+            atlasRow = tileId / 18;
+            sourceX = atlasCol * 16;
+            sourceY = atlasRow * 16;
+
+            // last row only shows half on screen (to match original NES game)
+            tileHeight = (screenRow == MAP_SCREEN_ROWS - 1) ? 8 : 16;
+
+            Rectangle source = {
+                sourceX, sourceY, 16, tileHeight
+            };
+
+            Rectangle destination = {
+                screenCol * 16 * FACTOR,
+                (56+ screenRow * 16) * FACTOR,
+                16 * FACTOR,
+                tileHeight * FACTOR
+            };
+
+            DrawTexturePro(
+                textures[TEXTURE_OVERWORLD_TILES],
+                source,
+                destination,
+                (Vector2){ 0, 0 },
+                0,
+                WHITE
+            );
+        }
+    }
 }

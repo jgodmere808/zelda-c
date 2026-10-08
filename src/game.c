@@ -2,7 +2,13 @@
 #include "game.h"
 #include "save.h"
 
+typedef struct {
+    Link link;
+} Game;
+
 GameState gameState;
+
+static Game game;
 
 void resetGameState(void)
 {
@@ -14,14 +20,19 @@ void resetGameState(void)
 void initGame()
 {
     resetGameState();
+    loadMapScreen(SPAWN_GAME_START);
+
+    game.link = initLink((Vector2){ 120, 112 });
 }
 
 void updateGame()
 {
-    return;
+    updateMap();
+    updateLink(&game.link);
 }
 
 void drawGame()
 {
-    return;
+    drawMap();
+    drawLink(&game.link);
 }

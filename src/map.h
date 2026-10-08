@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.h"
+#include "texture_map.h"
 
 typedef enum {
     SPAWN_GAME_START
@@ -9,3 +10,5 @@ typedef enum {
 bool initMap();
 void loadMapScreen(SpawnLocation spawnLocation);
 void transitionMap();
+void updateMap();
+void drawMap();

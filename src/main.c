@@ -37,7 +37,7 @@ int main()
         updateAudio();
 
         BeginDrawing();
-            ClearBackground(WHITE);
+            ClearBackground(BLACK);
 
             if (getMenu() == GAME_SCREEN) {
                 updateGame();
