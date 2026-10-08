@@ -14,6 +14,8 @@ typedef struct {
     Vector2 pos;
     Vector2 vel;
     Facing facing;
+    float animationTime;
+    float animationTimer;
 } Link;
 
 Link initLink(Vector2 pos);
