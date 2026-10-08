@@ -13,6 +13,8 @@ typedef enum {
 typedef struct {
     Vector2 pos;
     Vector2 vel;
+    int width;
+    int height;
     Facing facing;
     float animationTime;
     float animationTimer;

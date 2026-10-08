@@ -211,7 +211,7 @@ void drawMap()
 
             Rectangle destination = {
                 screenCol * 16 * FACTOR,
-                (56+ screenRow * 16) * FACTOR,
+                MAP_SHIFT_DOWN + (screenRow * 16) * FACTOR,
                 16 * FACTOR,
                 tileHeight * FACTOR
             };

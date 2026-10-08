@@ -8,9 +8,11 @@ Link initLink(Vector2 pos)
     Link link = {
         .pos = pos,
         .vel = (Vector2){ 0, 0 },
+        .width = 16,
+        .height = 16,
         .facing = FACING_UP,
         .animationTimer = 0,
-        .animationTime = 0.15f
+        .animationTime = 0.12f
     };
 
     return link;
