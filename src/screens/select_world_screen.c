@@ -67,7 +67,7 @@ void refreshSelectWorldScreen(SelectWorldScreen *screen)
 
     char names[SELECT_WORLD_SLOT_COUNT][SELECT_WORLD_NAME_LENGTH + 1] = {{0}};
     for (int slot = 0; slot < SELECT_WORLD_SLOT_COUNT; slot++) {
-        GameState saved = {0};
+        GameData saved = {0};
         if (loadSave((SaveRegister)slot, &saved)) {
             saved.name[SELECT_WORLD_NAME_LENGTH] = '\0';
             if (validName(saved.name)) strcpy(names[slot], saved.name);
@@ -146,7 +146,7 @@ void updateSelectWorldScreen(SelectWorldScreen *screen)
 
     if (screen->selectedEntry < SELECT_WORLD_SLOT_COUNT) {
         int slot = screen->selectedEntry;
-        if (loadSave((SaveRegister)slot, &gameState)) {
+        if (loadSave((SaveRegister)slot, &gameData)) {
             screen->chosenSlot = slot;
             changeMenu(GAME_SCREEN);
         }

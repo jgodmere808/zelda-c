@@ -6,11 +6,11 @@
 
 typedef struct {
     char name[9];
-} GameState;
+} GameData;
 
-extern GameState gameState;
+extern GameData gameData;
 
-void resetGameState();
+void resetGameData();
 void initGame();
 void updateGame();
 void drawGame();

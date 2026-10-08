@@ -8,6 +8,6 @@ typedef enum {
     SAVE_REGISTER_3
 } SaveRegister;
 
-bool loadSave(SaveRegister saveRegister, GameState *gameState);
-bool storeSave(SaveRegister saveRegister, GameState *gameState);
+bool loadSave(SaveRegister saveRegister, GameData *gameData);
+bool storeSave(SaveRegister saveRegister, GameData *gameData);
 bool deleteSave(SaveRegister saveRegister);

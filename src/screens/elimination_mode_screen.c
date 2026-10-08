@@ -42,7 +42,7 @@ void refreshEliminationModeScreen(EliminationModeScreen *screen)
     if (!screen) return;
 
     for (int slot = 0; slot < ELIMINATION_MODE_SLOT_COUNT; slot++) {
-        GameState saved = {0};
+        GameData saved = {0};
         loadSave((SaveRegister)slot, &saved);
         saved.name[ELIMINATION_MODE_NAME_LENGTH] = '\0';
         if (strcmp(screen->names[slot], saved.name) != 0) {

@@ -6,20 +6,20 @@ typedef struct {
     Link link;
 } Game;
 
-GameState gameState;
+GameData gameData;
 
 static Game game;
 
-void resetGameState(void)
+void resetGameData(void)
 {
-    gameState = (GameState){
+    gameData = (GameData){
         .name = "LINK"
     };
 }
 
 void initGame()
 {
-    resetGameState();
+    resetGameData();
     loadMapScreen(SPAWN_GAME_START);
 
     game.link = initLink((Vector2){ 120, 112 });

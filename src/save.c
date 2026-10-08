@@ -14,25 +14,25 @@ static char *getSavePath(SaveRegister saveRegister)
     }
 }
 
-bool loadSave(SaveRegister saveRegister, GameState *gameState)
+bool loadSave(SaveRegister saveRegister, GameData *gameData)
 {
     FILE *file = fopen(getSavePath(saveRegister), "rb");
     if (!file) return false;
 
-    GameState loaded;
+    GameData loaded;
     bool ok = fread(&loaded, sizeof(loaded), 1, file) == 1;
     if (fclose(file) != 0) ok = false;
 
-    if (ok) *gameState = loaded;
+    if (ok) *gameData = loaded;
     return ok;
 }
 
-bool storeSave(SaveRegister saveRegister, GameState *gameState)
+bool storeSave(SaveRegister saveRegister, GameData *gameData)
 {
     FILE *file = fopen(getSavePath(saveRegister), "wb");
     if (!file) return false;
 
-    bool ok = fwrite(gameState, sizeof(*gameState), 1, file) == 1;
+    bool ok = fwrite(gameData, sizeof(*gameData), 1, file) == 1;
     if (fclose(file) != 0) ok = false;
 
     return ok;

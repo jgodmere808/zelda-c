@@ -60,7 +60,7 @@ RegisterModeScreen initRegisterModeScreen(void)
     RegisterModeScreen screen = {0};
     memset(&registration, 0, sizeof registration);
     for (int slot = 0; slot < REGISTER_MODE_SLOT_COUNT; slot++) {
-        GameState saved;
+        GameData saved;
         if (loadSave((SaveRegister)slot, &saved)) {
             saved.name[NAME_LENGTH] = '\0';
             strcpy(registration.names[slot], saved.name);
@@ -149,9 +149,9 @@ void updateRegisterModeScreen(RegisterModeScreen *screen)
                screen->selectedSlot == REGISTER_MODE_SLOT_COUNT) {
         int slot = registration.editingSlot;
         if (slot < REGISTER_MODE_SLOT_COUNT && registration.names[slot][0] != '\0') {
-            resetGameState();
-            strcpy(gameState.name, registration.names[slot]);
-            screen->saveFailed = !storeSave((SaveRegister)slot, &gameState);
+            resetGameData();
+            strcpy(gameData.name, registration.names[slot]);
+            screen->saveFailed = !storeSave((SaveRegister)slot, &gameData);
             if (screen->saveFailed) return;
             registration.editingSlot = nextAvailableSlot();
         }
