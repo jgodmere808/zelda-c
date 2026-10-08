@@ -11,6 +11,11 @@
 
 #define MAP_SCREEN_PATH "map/overworld/row_%02d/screen_x%02d_y%02d.txt"
 
+// primarily for music selection
+typedef enum {
+    MAP_REGION_OVERWORLD,
+} MapRegion;
+
 typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
 
 typedef struct {
@@ -19,6 +24,7 @@ typedef struct {
     int currentMapCol;
     MapScreen currentScreen;
     MapScreen nextScreen;
+    MapRegion mapRegion;
 } Map;
 
 static Map map;
@@ -131,6 +137,7 @@ bool initMap()
 
     map.currentMapRow = 0;
     map.currentMapCol = 0;
+    map.mapRegion = 0;
 
     return true;
 }
@@ -143,8 +150,10 @@ void loadMapScreen(SpawnLocation spawnLocation)
         case SPAWN_GAME_START:
             mapRow = 7;
             mapCol = 7;
+            map.mapRegion = MAP_REGION_OVERWORLD;
             break;
         default:
+            changeMusic(MUSIC_NONE);
             mapRow = 0;
             mapCol = 0;
             break;
@@ -168,7 +177,13 @@ void transitionMap()
 
 void updateMap()
 {
-    return;
+    switch (map.mapRegion) {
+        case MAP_REGION_OVERWORLD:
+            changeMusic(MUSIC_OVERWORLD);
+            break;
+        default:
+            break;
+    }
 }
 
 void drawMap()

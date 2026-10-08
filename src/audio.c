@@ -3,6 +3,7 @@
 
 typedef struct {
     Music mainTheme;
+    Music overworld;
     MusicType type;
     bool musicLoaded;
 } Audio;
@@ -23,8 +24,15 @@ bool initAudio()
         return false;
     }
 
+    audio.overworld = LoadMusicStream("resources/audio/overworld_music.mp3");
+    if (!IsMusicValid(audio.overworld)) {
+        fprintf(stderr, "Failed to load audio overworld");
+        return false;
+    }
+
     audio.musicLoaded = true;
     audio.mainTheme.looping = true;
+    audio.overworld.looping = true;
     audio.type = MUSIC_MAIN_THEME;
     PlayMusicStream(audio.mainTheme);
     return true;
@@ -37,12 +45,17 @@ void endAudio()
 
 void changeMusic(MusicType type)
 {
-    if (!audio.musicLoaded) return;
+    if (!audio.musicLoaded || type == audio.type) return;
 
     // stop current music stream
     switch (audio.type) {
         case MUSIC_MAIN_THEME:
             StopMusicStream(audio.mainTheme);
+            break;
+        case MUSIC_OVERWORLD:
+            StopMusicStream(audio.overworld);
+            break;
+        case MUSIC_NONE:
             break;
         default:
             return;
@@ -54,6 +67,15 @@ void changeMusic(MusicType type)
             PlayMusicStream(audio.mainTheme);
             audio.type = type;
             break;
+        case MUSIC_OVERWORLD:
+            PlayMusicStream(audio.overworld);
+            audio.type = type;
+            break;
+        case MUSIC_NONE:
+            audio.type = type;
+            break;
+        default:
+            return;
     }
 }
 
@@ -65,6 +87,10 @@ void updateAudio()
         case MUSIC_MAIN_THEME:
             if (!IsMusicStreamPlaying(audio.mainTheme)) break;
             UpdateMusicStream(audio.mainTheme);
+            break;
+        case MUSIC_OVERWORLD:
+            if (!IsMusicStreamPlaying(audio.overworld)) break;
+            UpdateMusicStream(audio.overworld);
             break;
     }
 }

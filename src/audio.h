@@ -4,6 +4,8 @@
 
 typedef enum {
     MUSIC_MAIN_THEME,
+    MUSIC_OVERWORLD,
+    
     MUSIC_COUNT,
     MUSIC_NONE
 } MusicType;

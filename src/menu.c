@@ -27,9 +27,11 @@ MenuScreen getMenu()
 
 void changeMenu(MenuScreen nextScreen)
 {
+    // reset the variables for register mode
     if (nextScreen == REGISTER_MODE_SCREEN && menu.currentScreen != REGISTER_MODE_SCREEN) {
         menu.registerModeScreen = initRegisterModeScreen();
     }
+
     menu.currentScreen = nextScreen;
 }
 
