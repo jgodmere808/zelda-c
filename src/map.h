@@ -4,8 +4,9 @@
 #include "texture_map.h"
 #include "audio.h"
 
+#define MAP_TOP 56
+#define MAP_VISIBLE_HEIGHT (GAME_HEIGHT - MAP_TOP)
 #define MAP_SHIFT_DOWN (56 * FACTOR)
-
 #define MAP_BOTTOM_OVERHANG (8 * FACTOR)
 
 typedef enum {
@@ -21,6 +22,10 @@ typedef enum {
 
 bool initMap();
 void loadMapScreen(SpawnLocation spawnLocation);
-void transitionMap(MapTransition mapTransition);
+
+bool beginMapTransition(MapTransition mapTransition);
+void finishMapTransition();
+void drawMapTransition(float progress, MapTransition mapTransition);
+
 void updateMap();
 void drawMap();

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <math.h>
+#include <string.h>
 
 #include "raylib.h"
 

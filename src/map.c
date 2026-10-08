@@ -20,10 +20,15 @@ typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
 
 typedef struct {
     MapScreen mapScreens[MAP_ROWS][MAP_COLS];
+
+    MapScreen currentScreen;
     int currentMapRow;
     int currentMapCol;
-    MapScreen currentScreen;
+
     MapScreen nextScreen;
+    int nextMapRow;
+    int nextMapCol;
+
     MapRegion mapRegion;
 } Map;
 
@@ -170,22 +175,49 @@ void loadMapScreen(SpawnLocation spawnLocation)
     }
 }
 
-void transitionMap(MapTransition mapTransition)
+bool beginMapTransition(MapTransition mapTransition)
 {
+    map.nextMapRow = map.currentMapRow;
+    map.nextMapCol = map.currentMapCol;
+
     switch (mapTransition) {
         case MAP_TRANSITION_LEFT:
-            if (map.currentMapCol <= 0) return;
+            if (map.currentMapCol <= 0) return false;
+            map.nextMapCol--;
             break;
         case MAP_TRANSITION_RIGHT:
-            if (map.currentMapCol >= MAP_COLS) return;
+            if (map.currentMapCol >= MAP_COLS - 1) return false;
+            map.nextMapCol++;
             break;
         case MAP_TRANSITION_UP:
-            if (map.currentMapRow <= 0) return;
+            if (map.currentMapRow <= 0) return false;
+            map.nextMapRow--;
             break;
         case MAP_TRANSITION_DOWN:
-            if (map.currentMapRow >= MAP_ROWS) return;
+            if (map.currentMapRow >= MAP_ROWS - 1) return false;
+            map.nextMapRow++;
             break;
     }
+
+    memcpy(
+        map.nextScreen,
+        map.mapScreens[map.nextMapRow][map.nextMapCol],
+        sizeof(map.nextScreen)
+    );
+
+    return true;
+}
+
+void finishMapTransition()
+{
+    memcpy(
+        map.currentScreen,
+        map.nextScreen,
+        sizeof(map.currentScreen)
+    );
+
+    map.currentMapRow = map.nextMapRow;
+    map.currentMapCol = map.nextMapCol;
 }
 
 void updateMap()
@@ -199,32 +231,30 @@ void updateMap()
     }
 }
 
-void drawMap()
+static void drawMapScreen(
+    unsigned char screen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS],
+    int offsetX,
+    int offsetY
+)
 {
-    int tileHeight;
-    unsigned char tileId;
-    int screenRow, screenCol;
-    int atlasRow, atlasCol, sourceX, sourceY;
+    for (int row = 0; row < MAP_SCREEN_ROWS; row++) {
+        for (int col = 0; col < MAP_SCREEN_COLS; col++) {
+            unsigned char tileId = screen[row][col];
 
-    for (screenRow = 0; screenRow < MAP_SCREEN_ROWS; screenRow++) {
-        for (screenCol = 0; screenCol < MAP_SCREEN_COLS; screenCol++) {
-            tileId = map.currentScreen[screenRow][screenCol];
-
-            atlasCol = tileId % 18;
-            atlasRow = tileId / 18;
-            sourceX = atlasCol * 16;
-            sourceY = atlasRow * 16;
-
-            // last row only shows half on screen (to match original NES game)
-            tileHeight = (screenRow == MAP_SCREEN_ROWS - 1) ? 8 : 16;
+            int atlasCol = tileId % 18;
+            int atlasRow = tileId / 18;
+            int tileHeight = row == MAP_SCREEN_ROWS - 1 ? 8 : 16;
 
             Rectangle source = {
-                sourceX, sourceY, 16, tileHeight
+                atlasCol * 16,
+                atlasRow * 16,
+                16,
+                tileHeight
             };
 
             Rectangle destination = {
-                screenCol * 16 * FACTOR,
-                MAP_SHIFT_DOWN + (screenRow * 16) * FACTOR,
+                col * 16 * FACTOR + offsetX,
+                MAP_SHIFT_DOWN + row * 16 * FACTOR + offsetY,
                 16 * FACTOR,
                 tileHeight * FACTOR
             };
@@ -233,10 +263,65 @@ void drawMap()
                 textures[TEXTURE_OVERWORLD_TILES],
                 source,
                 destination,
-                (Vector2){ 0, 0 },
+                (Vector2){0, 0},
                 0,
                 WHITE
             );
         }
     }
+}
+
+void drawMap()
+{
+    drawMapScreen(map.currentScreen, 0, 0);
+}
+
+void drawMapTransition(float progress, MapTransition mapTransition)
+{
+    int oldX = 0;
+    int oldY = 0;
+    int nextX = 0;
+    int nextY = 0;
+
+    int width = GAME_WIDTH * FACTOR;
+    int height = MAP_VISIBLE_HEIGHT * FACTOR;
+
+    switch (mapTransition) {
+        case MAP_TRANSITION_RIGHT: {
+            int distance = (int)(width * progress);
+            oldX = -distance;
+            nextX = width - distance;
+            break;
+        }
+        case MAP_TRANSITION_LEFT: {
+            int distance = (int)(width * progress);
+            oldX = distance;
+            nextX = distance - width;
+            break;
+        }
+        case MAP_TRANSITION_DOWN: {
+            int distance = (int)(height * progress);
+            oldY = -distance;
+            nextY = height - distance;
+            break;
+        }
+        case MAP_TRANSITION_UP: {
+            int distance = (int)(height * progress);
+            oldY = distance;
+            nextY = distance - height;
+            break;
+        }
+    }
+
+    BeginScissorMode(
+        0,
+        MAP_SHIFT_DOWN,
+        SCREEN_WIDTH,
+        MAP_VISIBLE_HEIGHT * FACTOR
+    );
+
+    drawMapScreen(map.currentScreen, oldX, oldY);
+    drawMapScreen(map.nextScreen, nextX, nextY);
+
+    EndScissorMode();
 }
