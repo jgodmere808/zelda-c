@@ -170,9 +170,22 @@ void loadMapScreen(SpawnLocation spawnLocation)
     }
 }
 
-void transitionMap()
+void transitionMap(MapTransition mapTransition)
 {
-    return;
+    switch (mapTransition) {
+        case MAP_TRANSITION_LEFT:
+            if (map.currentMapCol <= 0) return;
+            break;
+        case MAP_TRANSITION_RIGHT:
+            if (map.currentMapCol >= MAP_COLS) return;
+            break;
+        case MAP_TRANSITION_UP:
+            if (map.currentMapRow <= 0) return;
+            break;
+        case MAP_TRANSITION_DOWN:
+            if (map.currentMapRow >= MAP_ROWS) return;
+            break;
+    }
 }
 
 void updateMap()
