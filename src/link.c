@@ -1,7 +1,60 @@
 
 #include "link.h"
+#include "map.h"
 
 #define LINK_SPEED 78
+#define LINK_FEET_INSET 2
+#define LINK_FEET_HEIGHT 6
+#define LINK_MOVE_STEP 4.0f
+
+Rectangle getLinkFeetAt(const Link *link, Vector2 pos)
+{
+    return (Rectangle){
+        pos.x + LINK_FEET_INSET,
+        pos.y + link->height - LINK_FEET_HEIGHT,
+        link->width - 2 * LINK_FEET_INSET,
+        LINK_FEET_HEIGHT
+    };
+}
+
+static void moveLinkAxis(Link *link, float distance, bool horizontal)
+{
+    float remaining = fabsf(distance);
+    float direction = distance < 0 ? -1.0f : 1.0f;
+
+    while (remaining > 0) {
+        float step = fminf(remaining, LINK_MOVE_STEP);
+        Vector2 next = link->pos;
+
+        if (horizontal) next.x += direction * step;
+        else next.y += direction * step;
+
+        if (!mapIsBlocked(getLinkFeetAt(link, next), false)) {
+            link->pos = next;
+            remaining -= step;
+            continue;
+        }
+
+        /* Find the last clear position within this step. */
+        float clear = 0;
+        float blocked = step;
+
+        for (int i = 0; i < 12; i++) {
+            float middle = (clear + blocked) * 0.5f;
+            next = link->pos;
+
+            if (horizontal) next.x += direction * middle;
+            else next.y += direction * middle;
+
+            if (mapIsBlocked(getLinkFeetAt(link, next), false)) blocked = middle;
+            else clear = middle;
+        }
+
+        if (horizontal) link->pos.x += direction * clear;
+        else link->pos.y += direction * clear;
+        break;
+    }
+}
 
 Link initLink(Vector2 pos)
 {
@@ -21,25 +74,26 @@ Link initLink(Vector2 pos)
 void updateLink(Link *link)
 {
     float dt = GetFrameTime();
+    int horizontal = IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT);
+    int vertical = IsKeyDown(KEY_DOWN) - IsKeyDown(KEY_UP);
+    float speed = horizontal && vertical
+        ? LINK_SPEED / sqrtf(2.0f)
+        : LINK_SPEED;
 
-    if (IsKeyDown(KEY_LEFT)) {
-        link->vel = (Vector2){ -LINK_SPEED, 0 };
+    link->vel = (Vector2){ horizontal * speed, vertical * speed };
+
+    if (horizontal < 0) {
         link->facing = FACING_LEFT;
-    } else if (IsKeyDown(KEY_RIGHT)) {
-        link->vel = (Vector2){ LINK_SPEED, 0 };
+    } else if (horizontal > 0) {
         link->facing = FACING_RIGHT;
-    } else if (IsKeyDown(KEY_UP)) {
-        link->vel = (Vector2){ 0, -LINK_SPEED };
+    } else if (vertical < 0) {
         link->facing = FACING_UP;
-    } else if (IsKeyDown(KEY_DOWN)) {
-        link->vel = (Vector2){ 0, LINK_SPEED };
+    } else if (vertical > 0) {
         link->facing = FACING_DOWN;
-    } else {
-        link->vel = (Vector2){ 0, 0 };
     }
 
-    link->pos.x = link->pos.x + link->vel.x * dt;
-    link->pos.y = link->pos.y + link->vel.y * dt;
+    moveLinkAxis(link, link->vel.x * dt, true);
+    moveLinkAxis(link, link->vel.y * dt, false);
 }
 
 void drawLink(Link *link)

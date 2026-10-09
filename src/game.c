@@ -21,6 +21,43 @@ GameData gameData;
 
 static Game game;
 
+static Vector2 transitionArrivalPosition(MapTransition direction)
+{
+    Vector2 pos = game.link.pos;
+
+    switch (direction) {
+        case MAP_TRANSITION_LEFT:
+            pos.x = GAME_WIDTH - game.link.width;
+            break;
+        case MAP_TRANSITION_RIGHT:
+            pos.x = 0;
+            break;
+        case MAP_TRANSITION_UP:
+            pos.y = GAME_HEIGHT + MAP_BOTTOM_OVERHANG / FACTOR
+                - game.link.height;
+            break;
+        case MAP_TRANSITION_DOWN:
+            pos.y = MAP_TOP;
+            break;
+    }
+
+    return pos;
+}
+
+static bool startMapTransition(MapTransition direction)
+{
+    Rectangle entryFeet = getLinkFeetAt(
+        &game.link, transitionArrivalPosition(direction)
+    );
+
+    if (!beginMapTransition(direction, entryFeet)) return false;
+
+    game.mapTransition = direction;
+    game.transitionProgress = 0;
+    game.gameState = GAME_STATE_MAP_TRANSITION;
+    return true;
+}
+
 void resetGameData(void)
 {
     gameData = (GameData){
@@ -48,26 +85,7 @@ void updateGame()
         if (game.transitionProgress >= 1.0f) {
             game.gameState = GAME_STATE_PLAYING;
             finishMapTransition();
-
-            switch (game.mapTransition) {
-                case MAP_TRANSITION_LEFT:
-                    game.link.pos.x = GAME_WIDTH - game.link.width;
-                    break;
-
-                case MAP_TRANSITION_RIGHT:
-                    game.link.pos.x = 0;
-                    break;
-
-                case MAP_TRANSITION_UP:
-                    game.link.pos.y =
-                        GAME_HEIGHT + MAP_BOTTOM_OVERHANG / FACTOR
-                        - game.link.height;
-                    break;
-
-                case MAP_TRANSITION_DOWN:
-                    game.link.pos.y = MAP_TOP;
-                    break;
-            }
+            game.link.pos = transitionArrivalPosition(game.mapTransition);
         }
         
         return;
@@ -78,41 +96,29 @@ void updateGame()
     updateLink(&game.link);
 
     if (game.link.pos.x < 0) {
-        if (beginMapTransition(MAP_TRANSITION_LEFT)) {
-            game.mapTransition = MAP_TRANSITION_LEFT;
-            game.transitionProgress = 0;
-            game.gameState = GAME_STATE_MAP_TRANSITION;
-        }
+        bool started = startMapTransition(MAP_TRANSITION_LEFT);
 
         game.link.pos.x = 0;
+        if (started) return;
     } else if (game.link.pos.x + game.link.width > GAME_WIDTH) {
-        if (beginMapTransition(MAP_TRANSITION_RIGHT)) {
-            game.mapTransition = MAP_TRANSITION_RIGHT;
-            game.transitionProgress = 0;
-            game.gameState = GAME_STATE_MAP_TRANSITION;
-        }
+        bool started = startMapTransition(MAP_TRANSITION_RIGHT);
 
         game.link.pos.x = GAME_WIDTH - game.link.width;
+        if (started) return;
     }
     
-    if (game.link.pos.y < 56) {
-        // transition map up
-        if (beginMapTransition(MAP_TRANSITION_UP)) {
-            game.mapTransition = MAP_TRANSITION_UP;
-            game.transitionProgress = 0;
-            game.gameState = GAME_STATE_MAP_TRANSITION;
-        }
+    if (game.link.pos.y < MAP_TOP) {
+        bool started = startMapTransition(MAP_TRANSITION_UP);
 
-        game.link.pos.y = 56;
-    } else if (game.link.pos.y + game.link.height > GAME_HEIGHT + 8) {
-        // transition map down
-        if (beginMapTransition(MAP_TRANSITION_DOWN)) {
-            game.mapTransition = MAP_TRANSITION_DOWN;
-            game.transitionProgress = 0;
-            game.gameState = GAME_STATE_MAP_TRANSITION;
-        }
+        game.link.pos.y = MAP_TOP;
+        if (started) return;
+    } else if (game.link.pos.y + game.link.height >
+               GAME_HEIGHT + MAP_BOTTOM_OVERHANG / FACTOR) {
+        bool started = startMapTransition(MAP_TRANSITION_DOWN);
 
-        game.link.pos.y = GAME_HEIGHT - game.link.height + 8;
+        game.link.pos.y = GAME_HEIGHT + MAP_BOTTOM_OVERHANG / FACTOR
+            - game.link.height;
+        if (started) return;
     }
 }
 

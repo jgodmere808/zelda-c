@@ -30,6 +30,7 @@ void updateTitleScreen(TitleScreen *titleScreen)
 {
     if (IsKeyPressed(KEY_ENTER)) {
         changeMenu(SELECT_WORLD_SCREEN);
+        changeMusic(MUSIC_NONE);
     }
 
     titleScreen->frameAccumulator += GetFrameTime();
