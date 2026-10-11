@@ -4,17 +4,8 @@
 #include "texture_map.h"
 #include "audio.h"
 
-#define MAP_TOP 56
-#define MAP_VISIBLE_HEIGHT (GAME_HEIGHT - MAP_TOP)
-#define MAP_SHIFT_DOWN (56 * FACTOR)
-#define MAP_BOTTOM_OVERHANG (8 * FACTOR)
-
-typedef enum {
-    MAP_TRANSITION_LEFT,
-    MAP_TRANSITION_RIGHT,
-    MAP_TRANSITION_UP,
-    MAP_TRANSITION_DOWN
-} MapTransition;
+#include "maps/overworld.h"
+#include "maps/cave_x07_y07.h"
 
 typedef enum {
     SPAWN_GAME_START

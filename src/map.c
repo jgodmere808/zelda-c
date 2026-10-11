@@ -122,9 +122,10 @@ unsigned char getMapTileSwordCollisionMask(unsigned char tileId)
     return tileCollisionMask[tileId] & ~tileSwordPassThroughMask[tileId];
 }
 
-// primarily for music selection
+// Distinguish different maps different maps
 typedef enum {
     MAP_REGION_OVERWORLD,
+    MAP_REGION_CAVE_x07_y07
 } MapRegion;
 
 typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];

@@ -28,6 +28,8 @@ bool initTextureMap()
         "resources/textures/menu/life_heart_empty.png",
         "resources/textures/menu/selection_tile_red.png",
         "resources/textures/overworld/tiles_16x16.png",
+        "resources/textures/caves/tiles_16x16.png",
+        "resources/textures/items/tiles_16x16.png",
         "resources/textures/characters/link_spritesheet.png"
     };
 

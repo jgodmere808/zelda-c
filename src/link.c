@@ -76,11 +76,10 @@ void updateLink(Link *link)
     float dt = GetFrameTime();
     int horizontal = IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT);
     int vertical = IsKeyDown(KEY_DOWN) - IsKeyDown(KEY_UP);
-    float speed = horizontal && vertical
-        ? LINK_SPEED / sqrtf(2.0f)
-        : LINK_SPEED;
 
-    link->vel = (Vector2){ horizontal * speed, vertical * speed };
+    if (horizontal != 0) vertical = 0;
+
+    link->vel = (Vector2){ horizontal * LINK_SPEED, vertical * LINK_SPEED };
 
     if (horizontal < 0) {
         link->facing = FACING_LEFT;

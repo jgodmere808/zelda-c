@@ -29,6 +29,14 @@ typedef enum {
 
     /* OVERWORLD */
     TEXTURE_OVERWORLD_TILES,
+
+    /* CAVES */
+    TEXTURE_CAVE_TILES,
+
+    /* ITEMS */
+    TEXTURE_ITEM_TILES,
+
+    /* CHARACTERS */
     TEXTURE_LINK_SPRITESHEET,
 
     TEXTURE_COUNT
