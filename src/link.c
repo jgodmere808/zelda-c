@@ -155,3 +155,67 @@ void drawLink(Link *link)
         WHITE
     );
 }
+
+void drawLinkEnteringCave(Link *link, float *progress)
+{
+    Rectangle source;
+
+    float cycle = 2.0f * link->animationTime;
+
+    link->animationTimer =
+        fmodf(link->animationTimer + GetFrameTime(), cycle);
+
+    if (link->animationTimer >= link->animationTime ? 1 : 0) {
+        source = (Rectangle){ 52, 52, 16, 16 - 16 * (*progress) };
+    } else {
+        source = (Rectangle){ 12, 52, 16, 16 - 16 * (*progress) };
+    }
+
+    Rectangle destination = {
+        link->pos.x * FACTOR,
+        link->pos.y * FACTOR + 16 * FACTOR * (*progress),
+        16 * FACTOR,
+        16 * FACTOR - 16 * FACTOR * (*progress)
+    };
+
+    DrawTexturePro(
+        textures[TEXTURE_LINK_SPRITESHEET],
+        source,
+        destination,
+        (Vector2){ 0, 0 },
+        0,
+        WHITE
+    );
+}
+
+void drawLinkExitingCave(Link *link, float *progress)
+{
+    Rectangle source;
+
+    float cycle = 2.0f * link->animationTime;
+
+    link->animationTimer =
+        fmodf(link->animationTimer + GetFrameTime(), cycle);
+
+    if (link->animationTimer >= link->animationTime ? 1 : 0) {
+        source = (Rectangle){ 52, 52, 16, 16 * (*progress) };
+    } else {
+        source = (Rectangle){ 12, 52, 16, 16 * (*progress) };
+    }
+
+    Rectangle destination = {
+        link->pos.x * FACTOR,
+        link->pos.y * FACTOR - 16 * FACTOR * (*progress),
+        16 * FACTOR,
+        16 * FACTOR * (*progress)
+    };
+
+    DrawTexturePro(
+        textures[TEXTURE_LINK_SPRITESHEET],
+        source,
+        destination,
+        (Vector2){ 0, 0 },
+        0,
+        WHITE
+    );
+}

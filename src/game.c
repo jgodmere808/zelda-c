@@ -104,6 +104,20 @@ void updateGame()
     }
 }
 
+static bool enteringCave(MapChangeEvent event)
+{
+    return (
+        event.origin == MAP_LOCATION_OVERWORLD_CAVE_x07_y07
+    );
+}
+
+static bool exitingCave(MapChangeEvent event)
+{
+    return (
+        event.destination == MAP_LOCATION_OVERWORLD_CAVE_x07_y07
+    );
+}
+
 void drawGame()
 {
     switch (game.state) {
@@ -113,11 +127,15 @@ void drawGame()
             break;
         case GAME_STATE_ENTERING:
             drawMapEntering(&game.mapChangeEvent, &game.enteringProgress);
-            drawLink(&game.link);
+            if (enteringCave(game.mapChangeEvent)) {
+                drawLinkEnteringCave(&game.link, &game.enteringProgress);
+            } else drawLink(&game.link);
             break;
         case GAME_STATE_EXITING:
             drawMapExiting(&game.mapChangeEvent, &game.exitingProgress);
-            drawLink(&game.link);
+            if (exitingCave(game.mapChangeEvent)) {
+                drawLinkExitingCave(&game.link, &game.exitingProgress);
+            } else drawLink(&game.link);
             break;
         default:
             break;

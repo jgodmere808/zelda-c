@@ -22,5 +22,9 @@ typedef struct {
 
 Link initLink(Vector2 pos);
 Rectangle getLinkFeetAt(const Link *link, Vector2 pos);
+
 void updateLink(Link *link);
+
 void drawLink(Link *link);
+void drawLinkEnteringCave(Link *link, float *progress);
+void drawLinkExitingCave(Link *link, float *progress);
