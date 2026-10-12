@@ -14,6 +14,7 @@ typedef enum {
 typedef enum {
     SOUND_CAVE_ENTRANCE,
     SOUND_CAVE_ENTRANCE_STAIRS,
+    SOUND_TEXT,
 
     SOUND_COUNT
 } SoundType;

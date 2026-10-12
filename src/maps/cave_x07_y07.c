@@ -2,10 +2,12 @@
 #include "cave_x07_y07.h"
 
 #include "loader.h"
+#include "../audio.h"
 #include "../texture_map.h"
 
 #define MAP_CAVE_ENTERING_TIME 0.1f
-#define MAP_CAVE_EXITING_TIME  1.0f
+#define MAP_CAVE_EXITING_TIME_WITH_SWORD  2.0f
+#define MAP_CAVE_EXITING_TIME_WITHOUT_SWORD 0.1f
 
 #define CAVE_TILE_COUNT 4
 
@@ -29,11 +31,12 @@ unsigned char getMapCavex07y07CollisionMask(unsigned char tileId)
 typedef struct {
     MapScreen screen;
     float fireAnimationTimer;
+    bool *collectedSword1; // linked to GameData
 } MapCavex07y07;
 
 static MapCavex07y07 mapCavex07y07;
 
-bool initMapCavex07y07()
+bool initMapCavex07y07(bool *collectedSword1)
 {
     FILE *file = fopen(CAVE_SCREEN_PATH, "r");
     if (file == NULL) {
@@ -60,6 +63,9 @@ bool initMapCavex07y07()
         }
     }
 
+    mapCavex07y07.fireAnimationTimer = 0;
+    mapCavex07y07.collectedSword1 = collectedSword1;
+
     return true;
 }
 
@@ -83,10 +89,14 @@ void updateMapCavex07y07Entering(float *progress)
 
 void updateMapCavex07y07Exiting(float *progress)
 {
-    *progress += GetFrameTime() / MAP_CAVE_EXITING_TIME;
+    if (*mapCavex07y07.collectedSword1) {
+        *progress += GetFrameTime() / MAP_CAVE_EXITING_TIME_WITHOUT_SWORD;
+    } else {
+        *progress += GetFrameTime() / MAP_CAVE_EXITING_TIME_WITH_SWORD;
+    }
 }
 
-void drawMapCavex07y07(MapScreen *screen)
+void drawMapCavex07y07(MapScreen *screen, bool isEnteringOrExiting)
 {
     mapCavex07y07.fireAnimationTimer += GetFrameTime();
     if (mapCavex07y07.fireAnimationTimer >= FIRE_ANIMATION_TIME) {
@@ -130,14 +140,37 @@ void drawMapCavex07y07(MapScreen *screen)
             );
         }
     }
+
+    if (*mapCavex07y07.collectedSword1 || isEnteringOrExiting) return;
+
+    const char *str[] = {
+        "IT'S  DANGEROUS  TO  GO",
+        "ALONE!  TAKE  THIS."
+    };
+
+    DrawText(str[0], 46 * FACTOR, (35 + MAP_TOP) * FACTOR, 36, WHITE);
+    DrawText(str[1], 66 * FACTOR, (45 + MAP_TOP) * FACTOR, 36, WHITE);
 }
 
 void drawMapCavex07y07Entering(MapScreen *screen, float *progress)
 {
-    drawMapCavex07y07(screen);
+    drawMapCavex07y07(screen, true);
 }
 
 void drawMapCavex07y07Exiting(MapScreen *screen, float *progress)
 {
-    drawMapCavex07y07(screen);
+    drawMapCavex07y07(screen, true);
+
+    if (*mapCavex07y07.collectedSword1) return;
+
+    const int totalChars = 43;
+    const char *str1 = "IT'S  DANGEROUS  TO  GO";
+    const char *str2 = "ALONE!  TAKE  THIS.";
+
+    const int charsSoFar = (int)(*progress * totalChars);
+    const int count1 = Clamp(charsSoFar, 0, TextLength(str1));
+    const int count2 = Clamp(charsSoFar - count1, 0, TextLength(str2));
+
+    DrawText(TextSubtext(str1, 0, count1), 46 * FACTOR, (35 + MAP_TOP) * FACTOR, 36, WHITE);
+    DrawText(TextSubtext(str2, 0, count2), 66 * FACTOR, (45 + MAP_TOP) * FACTOR, 36, WHITE);
 }

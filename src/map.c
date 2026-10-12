@@ -24,7 +24,7 @@ bool initMap()
 {
     return (
         initMapOverworld() &&
-        initMapCavex07y07()
+        initMapCavex07y07(&gameData.collectedSword1)
     );
 }
 
@@ -199,7 +199,7 @@ void drawMap()
             drawMapOverworld(map.currentScreen);
             break;
         case MAP_REGION_CAVE_x07_y07:
-            drawMapCavex07y07(map.currentScreen);
+            drawMapCavex07y07(map.currentScreen, false);
             break;
         default:
             return;

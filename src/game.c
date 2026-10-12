@@ -3,8 +3,6 @@
 
 #include "audio.h"
 
-GameData gameData;
-
 typedef enum {
     GAME_STATE_PLAYING,
 
