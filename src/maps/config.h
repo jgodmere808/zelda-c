@@ -4,10 +4,10 @@
 
 #define MAP_TOP 56
 #define MAP_VISIBLE_HEIGHT (GAME_HEIGHT - MAP_TOP)
-#define MAP_BOTTOM_OVERHANG 8
 
 #define MAP_SCREEN_ROWS 11
 #define MAP_SCREEN_COLS 16
+#define MAP_ATLAS_TILE_COUNT (18 * 8)
 
 enum {
     TILE_OPEN = 0,
@@ -23,13 +23,6 @@ enum {
 };
 
 typedef enum {
-    MAP_TRANSITION_LEFT,
-    MAP_TRANSITION_RIGHT,
-    MAP_TRANSITION_UP,
-    MAP_TRANSITION_DOWN
-} MapTransition;
-
-typedef enum {
     // Overworld Locations
     MAP_LOCATION_OVERWORLD_SPAWN,
     MAP_LOCATION_OVERWORLD_CAVE_x07_y07
@@ -39,8 +32,5 @@ typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
 
 typedef struct {
     MapScreen *screen;
-    int row;
-    int col;
     Vector2 pos;
-    MapLocation location;
 } MapLocationData;

@@ -54,7 +54,8 @@ bool loaderLoadScreen(
 
             unsigned long tileId = strtoul(p, &end, 16);
 
-            if (end - p != 2 || (*end != '\0' && !isspace((unsigned char)*end))) {
+            if (end - p != 2 || tileId >= MAP_ATLAS_TILE_COUNT ||
+                (*end != '\0' && !isspace((unsigned char)*end))) {
                 return false;
             }
 

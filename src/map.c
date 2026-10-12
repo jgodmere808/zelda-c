@@ -1,6 +1,10 @@
 
 #include "map.h"
 
+#include "audio.h"
+#include "texture_map.h"
+#include "maps/overworld.h"
+
 /*
  * Terrain collision metadata, indexed by the same ID as the tile atlas.
  * Each bit covers one 8 x 8 quadrant of a 16 x 16 tile. Movement and sword
@@ -10,18 +14,6 @@
  *   1 2
  *   4 8
  */
-enum {
-    TILE_OPEN = 0,
-    TILE_BLOCK_NW = 1,
-    TILE_BLOCK_NE = 2,
-    TILE_BLOCK_SW = 4,
-    TILE_BLOCK_SE = 8,
-    TILE_BLOCK_LEFT = TILE_BLOCK_NW | TILE_BLOCK_SW,
-    TILE_BLOCK_RIGHT = TILE_BLOCK_NE | TILE_BLOCK_SE,
-    TILE_BLOCK_TOP = TILE_BLOCK_NW | TILE_BLOCK_NE,
-    TILE_BLOCK_BOTTOM = TILE_BLOCK_SW | TILE_BLOCK_SE,
-    TILE_SOLID = TILE_BLOCK_TOP | TILE_BLOCK_BOTTOM
-};
 
 enum {
     TILE_SMALL_TREE_BROWN = 0x13,
@@ -118,13 +110,8 @@ typedef enum {
     MAP_REGION_CAVE_x07_y07
 } MapRegion;
 
-typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
-
 typedef struct {
     MapScreen *currentScreen;
-
-    MapScreen *nextScreen;
-
     MapRegion mapRegion;
 } Map;
 
@@ -132,52 +119,18 @@ static Map map;
 
 bool initMap()
 {
-    if (!initMapOverworld()){
-        return false;
-    }
-
-    // if (!initMapCavex07y07()) {
-    //     return false;
-    // }
-
-    map.currentMapRow = 0;
-    map.currentMapCol = 0;
-    map.mapRegion = 0;
-
-    return true;
+    return initMapOverworld();
 }
 
-void loadMap(SpawnLocation spawnLocation)
+Vector2 loadMapScreen(MapLocation location)
 {
-    int mapRow, mapCol, screenRow, screenCol;
-
-    switch (spawnLocation) {
-        case SPAWN_GAME_START:
-            mapRow = 7;
-            mapCol = 7;
-            map.mapRegion = MAP_REGION_OVERWORLD;
-            break;
-        default:
-            changeMusic(MUSIC_NONE);
-            mapRow = 0;
-            mapCol = 0;
-            break;
-    }
-
-    map.currentMapRow = mapRow;
-    map.currentMapCol = mapCol;
-
-    for (screenRow = 0; screenRow < MAP_SCREEN_ROWS; screenRow++) {
-        for (screenCol = 0; screenCol < MAP_SCREEN_COLS; screenCol++) {
-            map.currentScreen[screenRow][screenCol] = 
-                map.mapScreens[mapRow][mapCol][screenRow][screenCol];
-        }
-    }
+    MapLocationData data = loadMapOverworld(location);
+    map.currentScreen = data.screen;
+    map.mapRegion = MAP_REGION_OVERWORLD;
+    return data.pos;
 }
 
-static bool mapScreenIsBlocked(
-    MapScreen screen, Rectangle location, bool isSword
-)
+bool mapIsBlocked(Rectangle location, bool isSword)
 {
     const float mapBottom = MAP_TOP + MAP_VISIBLE_HEIGHT;
     const float left = fmaxf(location.x, 0);
@@ -185,7 +138,7 @@ static bool mapScreenIsBlocked(
     const float right = fminf(location.x + location.width, GAME_WIDTH);
     const float bottom = fminf(location.y + location.height, mapBottom);
 
-    /* Screen edges are handled by map transitions, not terrain collision. */
+    /* Only visible map tiles contribute terrain collision. */
     if (!(right > left && bottom > top)) return false;
 
     for (int row = (int)(top - MAP_TOP) / 16;
@@ -194,7 +147,7 @@ static bool mapScreenIsBlocked(
         for (int col = (int)left / 16;
              col < MAP_SCREEN_COLS && col * 16 < right;
              col++) {
-            unsigned char tileId = screen[row][col];
+            unsigned char tileId = (*map.currentScreen)[row][col];
             unsigned char mask = isSword
                 ? getMapTileSwordCollisionMask(tileId)
                 : getMapTileCollisionMask(tileId);
@@ -216,101 +169,6 @@ static bool mapScreenIsBlocked(
     return false;
 }
 
-bool mapIsBlocked(Rectangle location, bool isSword)
-{
-    return mapScreenIsBlocked(map.currentScreen, location, isSword);
-}
-
-bool isMapSolidAt()
-{
-    switch (map.mapRegion) {
-        case MAP_REGION_OVERWORLD:
-            isMapOverworldSolidAt();
-            break;
-        case MAP_REGION_CAVE_x07_y07:
-            isMapCavex07y07SolidAt();
-            break;
-        default:
-            return true;
-    }
-}
-
-bool beginMapTransition(MapTransition mapTransition, Rectangle destinationFeet)
-{
-    int nextRow = map.currentMapRow;
-    int nextCol = map.currentMapCol;
-    const float mapBottom = MAP_TOP + MAP_VISIBLE_HEIGHT;
-
-    switch (mapTransition) {
-        case MAP_TRANSITION_LEFT:
-            if (map.currentMapCol <= 0) return false;
-            nextCol--;
-            break;
-        case MAP_TRANSITION_RIGHT:
-            if (map.currentMapCol >= MAP_COLS - 1) return false;
-            nextCol++;
-            break;
-        case MAP_TRANSITION_UP:
-            if (map.currentMapRow <= 0) return false;
-            nextRow--;
-            break;
-        case MAP_TRANSITION_DOWN:
-            if (map.currentMapRow >= MAP_ROWS - 1) return false;
-            nextRow++;
-            break;
-    }
-
-    if (!(destinationFeet.width > 0 && destinationFeet.height > 0)) {
-        return false;
-    }
-
-    if (mapTransition == MAP_TRANSITION_LEFT ||
-        mapTransition == MAP_TRANSITION_RIGHT) {
-        if (destinationFeet.y < MAP_TOP ||
-            destinationFeet.y + destinationFeet.height > mapBottom) {
-            return false;
-        }
-    } else {
-        if (destinationFeet.x < 0 ||
-            destinationFeet.x + destinationFeet.width > GAME_WIDTH) {
-            return false;
-        }
-
-        if (mapTransition == MAP_TRANSITION_UP) {
-            /* Link arrives below the visible map; inspect its bottom row. */
-            destinationFeet.y = mapBottom - destinationFeet.height;
-        }
-    }
-
-    if (mapScreenIsBlocked(
-        map.mapScreens[nextRow][nextCol], destinationFeet, false
-    )) {
-        return false;
-    }
-
-    map.nextMapRow = nextRow;
-    map.nextMapCol = nextCol;
-    memcpy(
-        map.nextScreen,
-        map.mapScreens[nextRow][nextCol],
-        sizeof(map.nextScreen)
-    );
-
-    return true;
-}
-
-void finishMapTransition()
-{
-    memcpy(
-        map.currentScreen,
-        map.nextScreen,
-        sizeof(map.currentScreen)
-    );
-
-    map.currentMapRow = map.nextMapRow;
-    map.currentMapCol = map.nextMapCol;
-}
-
 void updateMap()
 {
     switch (map.mapRegion) {
@@ -322,15 +180,11 @@ void updateMap()
     }
 }
 
-static void drawMapScreen(
-    unsigned char screen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS],
-    int offsetX,
-    int offsetY
-)
+void drawMap()
 {
     for (int row = 0; row < MAP_SCREEN_ROWS; row++) {
         for (int col = 0; col < MAP_SCREEN_COLS; col++) {
-            unsigned char tileId = screen[row][col];
+            unsigned char tileId = (*map.currentScreen)[row][col];
 
             int atlasCol = tileId % 18;
             int atlasRow = tileId / 18;
@@ -344,8 +198,8 @@ static void drawMapScreen(
             };
 
             Rectangle destination = {
-                col * 16 * FACTOR + offsetX,
-                MAP_SHIFT_DOWN + row * 16 * FACTOR + offsetY,
+                col * 16 * FACTOR,
+                (MAP_TOP + row * 16) * FACTOR,
                 16 * FACTOR,
                 tileHeight * FACTOR
             };
@@ -360,59 +214,4 @@ static void drawMapScreen(
             );
         }
     }
-}
-
-void drawMap()
-{
-    drawMapScreen(map.currentScreen, 0, 0);
-}
-
-void drawMapTransition(float progress, MapTransition mapTransition)
-{
-    int oldX = 0;
-    int oldY = 0;
-    int nextX = 0;
-    int nextY = 0;
-
-    int width = GAME_WIDTH * FACTOR;
-    int height = MAP_VISIBLE_HEIGHT * FACTOR;
-
-    switch (mapTransition) {
-        case MAP_TRANSITION_RIGHT: {
-            int distance = (int)(width * progress);
-            oldX = -distance;
-            nextX = width - distance;
-            break;
-        }
-        case MAP_TRANSITION_LEFT: {
-            int distance = (int)(width * progress);
-            oldX = distance;
-            nextX = distance - width;
-            break;
-        }
-        case MAP_TRANSITION_DOWN: {
-            int distance = (int)(height * progress);
-            oldY = -distance;
-            nextY = height - distance;
-            break;
-        }
-        case MAP_TRANSITION_UP: {
-            int distance = (int)(height * progress);
-            oldY = distance;
-            nextY = distance - height;
-            break;
-        }
-    }
-
-    BeginScissorMode(
-        0,
-        MAP_SHIFT_DOWN,
-        SCREEN_WIDTH,
-        MAP_VISIBLE_HEIGHT * FACTOR
-    );
-
-    drawMapScreen(map.currentScreen, oldX, oldY);
-    drawMapScreen(map.nextScreen, nextX, nextY);
-
-    EndScissorMode();
 }

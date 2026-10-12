@@ -1,10 +1,9 @@
 
 #include "overworld.h"
+#include "loader.h"
 
 #define MAP_OVERWORLD_ROWS  8
 #define MAP_OVERWORLD_COLS 16
-
-#define MAP_ATLAS_TILE_COUNT (18 * 8)
 
 #define MAP_OVERWORLD_SCREEN_PATH "map/overworld/row_%02d/screen_x%02d_y%02d.txt"
 
@@ -22,8 +21,8 @@ bool initMapOverworld()
     bool loaded;
 
     // load the map
-    for (row = 0; row < MAP_ROWS; row++) {
-        for (col = 0; col < MAP_COLS; col++) {
+    for (row = 0; row < MAP_OVERWORLD_ROWS; row++) {
+        for (col = 0; col < MAP_OVERWORLD_COLS; col++) {
             length = snprintf(
                 path, sizeof(path), MAP_OVERWORLD_SCREEN_PATH, row, col, row
             );
@@ -38,7 +37,9 @@ bool initMapOverworld()
                 return false;
             }
 
-            loaded = loaderLoadScreen(file, row, col);
+            loaded = loaderLoadScreen(
+                file, &mapOverworld.screens[row][col], row, col
+            );
             fclose(file);
 
             if (!loaded) {
@@ -75,16 +76,8 @@ MapLocationData loadMapOverworld(MapLocation location)
 
     locationData = (MapLocationData){
         .screen = &mapOverworld.screens[row][col],
-        .row = row,
-        .col = col,
-        .pos = pos,
-        .location = location
+        .pos = pos
     };
 
     return locationData;
 }
-
-// bool isMapSolidAt()
-// {
-//     return;
-// }
