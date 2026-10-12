@@ -6,6 +6,8 @@
 
 #define CAVE_TILE_COUNT 4
 
+#define FIRE_ANIMATION_TIME 0.2f
+
 #define CAVE_SCREEN_PATH "map/cave_x07_y07/screen_x00_y00.txt"
 
 /* Cave atlas IDs: black floor, rock wall, lower rock wall, and fire. */
@@ -23,6 +25,7 @@ unsigned char getMapCavex07y07CollisionMask(unsigned char tileId)
 
 typedef struct {
     MapScreen screen;
+    float fireAnimationTimer;
 } MapCavex07y07;
 
 static MapCavex07y07 mapCavex07y07;
@@ -72,13 +75,30 @@ void updateMapCavex07y07()
 
 void drawMapCavex07y07(MapScreen *screen)
 {
+    mapCavex07y07.fireAnimationTimer += GetFrameTime();
+    if (mapCavex07y07.fireAnimationTimer >= FIRE_ANIMATION_TIME) {
+        mapCavex07y07.fireAnimationTimer = fmodf(
+            mapCavex07y07.fireAnimationTimer,
+            FIRE_ANIMATION_TIME
+        );
+    }
+
     for (int row = 0; row < MAP_SCREEN_ROWS; row++) {
         for (int col = 0; col < MAP_SCREEN_COLS; col++) {
             unsigned char tileId = (*screen)[row][col];
             int tileHeight = row == MAP_SCREEN_ROWS - 1 ? 8 : 16;
 
+            // flip the source.width for fire animation
+            int sourceWidth;
+            if (tileId == 3) {
+                sourceWidth = mapCavex07y07.fireAnimationTimer <= FIRE_ANIMATION_TIME / 2
+                ? 16 : -16;
+            } else {
+                sourceWidth = 16;
+            }
+
             Rectangle source = {
-                tileId * 16, 0, 16, tileHeight
+                tileId * 16, 0, sourceWidth, tileHeight
             };
             Rectangle destination = {
                 col * 16 * FACTOR,
