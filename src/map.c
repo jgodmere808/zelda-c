@@ -20,8 +20,17 @@ typedef struct {
 
 static Map map;
 
+MapData mapData;
+
 bool initMap()
 {
+    mapData = (MapData){
+        .state = MAP_STATE_NONE,
+        .enteringProgress = 0,
+        .exitingProgress = 0,
+        .pos = { 0, 0 }
+    };
+
     return (
         initMapOverworld() &&
         initMapCavex07y07()
