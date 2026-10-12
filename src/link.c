@@ -173,7 +173,7 @@ void drawLinkEnteringCave(Link *link, float *progress)
 
     Rectangle destination = {
         link->pos.x * FACTOR,
-        link->pos.y * FACTOR + 16 * FACTOR * (*progress),
+        (link->pos.y + 1) * FACTOR + 16 * FACTOR * (*progress),
         16 * FACTOR,
         16 * FACTOR - 16 * FACTOR * (*progress)
     };
@@ -198,14 +198,14 @@ void drawLinkExitingCave(Link *link, float *progress)
         fmodf(link->animationTimer + GetFrameTime(), cycle);
 
     if (link->animationTimer >= link->animationTime ? 1 : 0) {
-        source = (Rectangle){ 52, 52, 16, 16 * (*progress) };
+        source = (Rectangle){ 52, 12, 16, 16 * (*progress) };
     } else {
-        source = (Rectangle){ 12, 52, 16, 16 * (*progress) };
+        source = (Rectangle){ 12, 12, 16, 16 * (*progress) };
     }
 
     Rectangle destination = {
         link->pos.x * FACTOR,
-        link->pos.y * FACTOR - 16 * FACTOR * (*progress),
+        (link->pos.y - 1) * FACTOR + 16 * FACTOR - 16 * FACTOR * (*progress),
         16 * FACTOR,
         16 * FACTOR * (*progress)
     };

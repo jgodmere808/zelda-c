@@ -106,9 +106,6 @@ MapChangeEvent getMapChangeEvent(Rectangle feet, Vector2 velocity)
 {
     MapChangeEvent event;
 
-    float feetCenterX = feet.x + feet.width * 0.5f;
-    float feetCenterY = feet.y + feet.height * 0.5f;
-
     if (map.mapRegion == MAP_REGION_OVERWORLD) {
         MapScreen *entranceScreen =
             loadMapOverworld(MAP_LOCATION_OVERWORLD_CAVE_x07_y07).screen;
@@ -120,8 +117,8 @@ MapChangeEvent getMapChangeEvent(Rectangle feet, Vector2 velocity)
         if (
             map.currentScreen == entranceScreen &&
             velocity.y < 0 &&
-            feetCenterX >= 64 && feetCenterX < 80 &&
-            feetCenterY >= 80 && feetCenterY < 88
+            feet.x >= 64 && feet.x + feet.width <= 80 &&
+            feet.y >= 80 && feet.y + feet.height <= 88
         ) {
             event.origin = MAP_LOCATION_OVERWORLD_CAVE_x07_y07;
             event.destination = MAP_LOCATION_CAVE_x07_y07;
@@ -136,8 +133,8 @@ MapChangeEvent getMapChangeEvent(Rectangle feet, Vector2 velocity)
          */
         if (
             velocity.y > 0 &&
-            feetCenterX >= 112 && feetCenterX < 144 &&
-            feetCenterY >= 216
+            feet.x >= 112 && feet.x + feet.width <= 144 &&
+            feet.y >= 216 && feet.y + feet.height <= GAME_HEIGHT
         ) {
             event.origin = MAP_LOCATION_CAVE_x07_y07;
             event.destination = MAP_LOCATION_OVERWORLD_CAVE_x07_y07;
