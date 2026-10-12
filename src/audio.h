@@ -5,6 +5,7 @@
 typedef enum {
     MUSIC_MAIN_THEME,
     MUSIC_OVERWORLD,
+    MUSIC_CAVE,
     
     MUSIC_COUNT,
     MUSIC_NONE

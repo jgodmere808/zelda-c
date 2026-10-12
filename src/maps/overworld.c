@@ -1,6 +1,7 @@
 
 #include "overworld.h"
 #include "loader.h"
+#include "../texture_map.h"
 
 #define MAP_OVERWORLD_ROWS  8
 #define MAP_OVERWORLD_COLS 16
@@ -138,4 +139,45 @@ MapLocationData loadMapOverworld(MapLocation location)
     };
 
     return locationData;
+}
+
+void updateMapOverworld()
+{
+    return;
+}
+
+void drawMapOverworld(MapScreen *screen)
+{
+    for (int row = 0; row < MAP_SCREEN_ROWS; row++) {
+        for (int col = 0; col < MAP_SCREEN_COLS; col++) {
+            unsigned char tileId = (*screen)[row][col];
+
+            int atlasCol = tileId % 18;
+            int atlasRow = tileId / 18;
+            int tileHeight = row == MAP_SCREEN_ROWS - 1 ? 8 : 16;
+
+            Rectangle source = {
+                atlasCol * 16,
+                atlasRow * 16,
+                16,
+                tileHeight
+            };
+
+            Rectangle destination = {
+                col * 16 * FACTOR,
+                (MAP_TOP + row * 16) * FACTOR,
+                16 * FACTOR,
+                tileHeight * FACTOR
+            };
+
+            DrawTexturePro(
+                textures[TEXTURE_OVERWORLD_TILES],
+                source,
+                destination,
+                (Vector2){0, 0},
+                0,
+                WHITE
+            );
+        }
+    }
 }
