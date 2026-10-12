@@ -150,7 +150,7 @@ MapLocationData loadMapOverworld(MapLocation location)
         case MAP_LOCATION_OVERWORLD_CAVE_x07_y07:
             row = 7;
             col = 7;
-            pos = (Vector2){ 64, 88 };
+            pos = (Vector2){ 64, 78 };
             break;
         default:
             fprintf(stderr, "Invalid Overworld MapLocation: %d", location);
