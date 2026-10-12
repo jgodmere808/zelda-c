@@ -1,6 +1,8 @@
 
 #include "game.h"
 
+#include "audio.h"
+
 GameData gameData;
 
 typedef enum {
@@ -53,6 +55,8 @@ static void startMapChangeEvent()
     game.state = GAME_STATE_ENTERING;
     game.enteringProgress = 0;
     game.exitingProgress = 0;
+    changeMusic(MUSIC_NONE);
+    playSound(SOUND_CAVE_ENTRANCE);
 }
 
 void updateGame()

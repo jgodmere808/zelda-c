@@ -6,12 +6,20 @@ typedef struct {
     Music overworld;
     MusicType type;
     bool musicLoaded;
+    Sound sounds[SOUND_COUNT];
 } Audio;
 
 static Audio audio;
 
+const char *soundPaths[] = {
+    "resources/audio/cave_entrance.mp3",
+    "resources/audio/cave_entrance_stairs.mp3"
+};
+
 bool initAudio()
 {
+    int i;
+
     InitAudioDevice();
     if (!IsAudioDeviceReady()) {
         fprintf(stderr, "Failed to initialize audio device");
@@ -30,6 +38,15 @@ bool initAudio()
         return false;
     }
 
+    for (i = 0; i < SOUND_COUNT; i++) {
+        audio.sounds[i] = LoadSound(soundPaths[i]);
+
+        if (!IsSoundValid(audio.sounds[i])) {
+            fprintf(stderr, "Failed to load sound: %d\n", i);
+            return false;
+        }
+    }
+
     audio.musicLoaded = true;
     audio.mainTheme.looping = true;
     audio.overworld.looping = true;
@@ -40,6 +57,15 @@ bool initAudio()
 
 void endAudio()
 {
+    int i;
+
+    UnloadMusicStream(audio.mainTheme);
+    UnloadMusicStream(audio.overworld);
+
+    for (i = 0; i < SOUND_COUNT; i++) {
+        UnloadSound(audio.sounds[i]);
+    }
+
     CloseAudioDevice();
 }
 
@@ -77,6 +103,13 @@ void changeMusic(MusicType type)
         default:
             return;
     }
+}
+
+void playSound(SoundType type)
+{
+    if (type >= SOUND_COUNT) return;
+
+    PlaySound(audio.sounds[type]);
 }
 
 void updateAudio()

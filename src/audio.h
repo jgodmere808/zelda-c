@@ -11,8 +11,16 @@ typedef enum {
     MUSIC_NONE
 } MusicType;
 
+typedef enum {
+    SOUND_CAVE_ENTRANCE,
+    SOUND_CAVE_ENTRANCE_STAIRS,
+
+    SOUND_COUNT
+} SoundType;
+
 bool initAudio();
 void endAudio();
 void changeMusic(MusicType type);
+void playSound(SoundType type);
 void updateAudio();
 
