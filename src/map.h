@@ -3,9 +3,11 @@
 #include "maps/config.h"
 
 bool initMap();
-Vector2 loadMapScreen(MapLocation location);
+Vector2 loadMap(MapLocation location);
 
 bool mapIsBlocked(Rectangle location);
+
+MapLocation getMapChangeEvent(Rectangle feet, Vector2 velocity);
 
 void updateMap();
 void drawMap();

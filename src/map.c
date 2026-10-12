@@ -22,14 +22,32 @@ static Map map;
 
 bool initMap()
 {
-    return initMapOverworld();
+    return (
+        initMapOverworld() &&
+        initMapCavex07y07()
+    );
 }
 
-Vector2 loadMapScreen(MapLocation location)
+Vector2 loadMap(MapLocation location)
 {
-    MapLocationData data = loadMapOverworld(location);
+    MapLocationData data;
+
+    switch (location) {
+        case MAP_LOCATION_OVERWORLD_SPAWN:
+        case MAP_LOCATION_OVERWORLD_CAVE_x07_y07:
+            data = loadMapOverworld(location);
+            map.mapRegion = MAP_REGION_OVERWORLD;
+            break;
+        case MAP_LOCATION_CAVE_x07_y07:
+            data = loadMapCavex07y07(location);
+            map.mapRegion = MAP_REGION_CAVE_x07_y07;
+            break;
+        default:
+            fprintf(stderr, "Invalid MapLocation: %d\n", location);
+            exit(EXIT_FAILURE);
+    }
+
     map.currentScreen = data.screen;
-    map.mapRegion = MAP_REGION_OVERWORLD;
     return data.pos;
 }
 
@@ -82,6 +100,42 @@ bool mapIsBlocked(Rectangle location)
     }
 
     return false;
+}
+
+MapLocation getMapChangeEvent(Rectangle feet, Vector2 velocity)
+{
+    float feetCenterX = feet.x + feet.width * 0.5f;
+    float feetCenterY = feet.y + feet.height * 0.5f;
+
+    if (map.mapRegion == MAP_REGION_OVERWORLD) {
+        MapScreen *entranceScreen =
+            loadMapOverworld(MAP_LOCATION_OVERWORLD_CAVE_x07_y07).screen;
+
+        /*
+         * Entrance tile 0x16 is at column 4, row 1:
+         * x = 64..80; its walkable lower half is y = 80..88.
+         */
+        if (map.currentScreen == entranceScreen &&
+            velocity.y < 0 &&
+            feetCenterX >= 64 && feetCenterX < 80 &&
+            feetCenterY >= 80 && feetCenterY < 88) {
+            return MAP_LOCATION_CAVE_x07_y07;
+        }
+    }
+
+    if (map.mapRegion == MAP_REGION_CAVE_x07_y07) {
+        /*
+         * The cave's bottom doorway occupies columns 7 and 8.
+         * The final tile row begins at y = 216.
+         */
+        if (velocity.y > 0 &&
+            feetCenterX >= 112 && feetCenterX < 144 &&
+            feetCenterY >= 216) {
+            return MAP_LOCATION_OVERWORLD_CAVE_x07_y07;
+        }
+    }
+
+    return MAP_LOCATION_NONE;
 }
 
 void updateMap()

@@ -15,7 +15,7 @@ void resetGameData(void)
 void initGame()
 {
     resetGameData();
-    link = initLink(loadMapScreen(MAP_LOCATION_OVERWORLD_CAVE_x07_y07));
+    link = initLink(loadMap(MAP_LOCATION_OVERWORLD_SPAWN));
 }
 
 void updateGame()
@@ -25,6 +25,13 @@ void updateGame()
 
     link.pos.x = fmaxf(0, fminf(link.pos.x, GAME_WIDTH - link.width));
     link.pos.y = fmaxf(MAP_TOP, fminf(link.pos.y, GAME_HEIGHT - link.height));
+
+    // Capture a change map event (entering cave from overworld)
+    Rectangle feet = getLinkFeetAt(&link, link.pos);
+    MapLocation destination = getMapChangeEvent(feet, link.vel);
+    if (destination != MAP_LOCATION_NONE) {
+        link.pos = loadMap(destination);
+    }
 }
 
 void drawGame()

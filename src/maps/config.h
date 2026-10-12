@@ -25,7 +25,12 @@ enum {
 typedef enum {
     // Overworld Locations
     MAP_LOCATION_OVERWORLD_SPAWN,
-    MAP_LOCATION_OVERWORLD_CAVE_x07_y07
+    MAP_LOCATION_OVERWORLD_CAVE_x07_y07,
+
+    // Cave Locations
+    MAP_LOCATION_CAVE_x07_y07,
+
+    MAP_LOCATION_NONE
 } MapLocation;
 
 typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
