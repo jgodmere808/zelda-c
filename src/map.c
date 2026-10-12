@@ -1,16 +1,6 @@
 
 #include "map.h"
 
-#define MAP_ROWS  8
-#define MAP_COLS 16
-
-#define MAP_SCREEN_ROWS 11
-#define MAP_SCREEN_COLS 16
-
-#define MAP_ATLAS_TILE_COUNT (18 * 8)
-
-#define MAP_SCREEN_PATH "map/overworld/row_%02d/screen_x%02d_y%02d.txt"
-
 /*
  * Terrain collision metadata, indexed by the same ID as the tile atlas.
  * Each bit covers one 8 x 8 quadrant of a 16 x 16 tile. Movement and sword
@@ -122,7 +112,7 @@ unsigned char getMapTileSwordCollisionMask(unsigned char tileId)
     return tileCollisionMask[tileId] & ~tileSwordPassThroughMask[tileId];
 }
 
-// Distinguish different maps different maps
+// Distinguish different maps
 typedef enum {
     MAP_REGION_OVERWORLD,
     MAP_REGION_CAVE_x07_y07
@@ -131,126 +121,24 @@ typedef enum {
 typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
 
 typedef struct {
-    MapScreen mapScreens[MAP_ROWS][MAP_COLS];
+    MapScreen *currentScreen;
 
-    MapScreen currentScreen;
-    int currentMapRow;
-    int currentMapCol;
-
-    MapScreen nextScreen;
-    int nextMapRow;
-    int nextMapCol;
+    MapScreen *nextScreen;
 
     MapRegion mapRegion;
 } Map;
 
 static Map map;
 
-static bool readContentLine(FILE *file, char *line, size_t size)
+bool initMap()
 {
-    while (fgets(line, size, file) != NULL) {
-        char *p = line;
-
-        while (isspace((unsigned char)*p)) p++;
-        
-        if (*p != '\0' && *p != '#') {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-static bool initMapScreen(FILE *file, int mapRow, int mapCol)
-{
-    char line[128];
-    int fileCol, fileRow;
-    char extra;
-
-    if (!readContentLine(file, line, sizeof line) ||
-        sscanf(line, "screen %d %d %c", &fileCol, &fileRow, &extra) != 2 ||
-        fileCol != mapCol || fileRow != mapRow) {
+    if (!initMapOverworld()){
         return false;
     }
 
-    for (int screenRow = 0; screenRow < MAP_SCREEN_ROWS; screenRow++) {
-        if (!readContentLine(file, line, sizeof line)) {
-            return false;
-        }
-
-        char *p = line;
-
-        for (int screenCol = 0; screenCol < MAP_SCREEN_COLS; screenCol++) {
-            char *end;
-
-            while (isspace((unsigned char)*p)) {
-                p++;
-            }
-
-            if (!isxdigit((unsigned char)p[0]) ||
-                !isxdigit((unsigned char)p[1])) {
-                return false;
-            }
-
-            unsigned long tileId = strtoul(p, &end, 16);
-
-            if (end - p != 2 ||
-                tileId >= MAP_ATLAS_TILE_COUNT ||
-                (*end != '\0' && !isspace((unsigned char)*end))) {
-                return false;
-            }
-
-            map.mapScreens[mapRow][mapCol][screenRow][screenCol] =
-                (unsigned char)tileId;
-            p = end;
-        }
-
-        while (isspace((unsigned char)*p)) {
-            p++;
-        }
-
-        if (*p != '\0') {
-            return false;  /* More than 16 IDs on this row. */
-        }
-    }
-
-    /* Reject extra non-comment data after the 11 tile rows. */
-    return !readContentLine(file, line, sizeof line) && !ferror(file);
-}
-
-bool initMap()
-{
-    FILE *file;
-    int row, col, length;
-    char path[64];
-    bool loaded;
-
-    // load the map
-    for (row = 0; row < MAP_ROWS; row++) {
-        for (col = 0; col < MAP_COLS; col++) {
-            length = snprintf(
-                path, sizeof(path), MAP_SCREEN_PATH, row, col, row
-            );
-
-            if (length < 0 || (size_t)length >= sizeof(path)) {
-                return false;
-            }
-
-            file = fopen(path, "r");
-            if (file == NULL) {
-                perror(path);
-                return false;
-            }
-
-            loaded = initMapScreen(file, row, col);
-            fclose(file);
-
-            if (!loaded) {
-                fprintf(stderr, "Invalid map screen: %s\n", path);
-                return false;
-            }
-        }
-    }
+    // if (!initMapCavex07y07()) {
+    //     return false;
+    // }
 
     map.currentMapRow = 0;
     map.currentMapCol = 0;
@@ -259,7 +147,7 @@ bool initMap()
     return true;
 }
 
-void loadMapScreen(SpawnLocation spawnLocation)
+void loadMap(SpawnLocation spawnLocation)
 {
     int mapRow, mapCol, screenRow, screenCol;
 
@@ -331,6 +219,20 @@ static bool mapScreenIsBlocked(
 bool mapIsBlocked(Rectangle location, bool isSword)
 {
     return mapScreenIsBlocked(map.currentScreen, location, isSword);
+}
+
+bool isMapSolidAt()
+{
+    switch (map.mapRegion) {
+        case MAP_REGION_OVERWORLD:
+            isMapOverworldSolidAt();
+            break;
+        case MAP_REGION_CAVE_x07_y07:
+            isMapCavex07y07SolidAt();
+            break;
+        default:
+            return true;
+    }
 }
 
 bool beginMapTransition(MapTransition mapTransition, Rectangle destinationFeet)

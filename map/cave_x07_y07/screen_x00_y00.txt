@@ -1,0 +1,17 @@
+# First-quest wooden sword cave entered from overworld screen x=7, y=7.
+# Cave tiles: 00 black, 01 rock wall, 02 lower rock wall, 03 fire.
+# The old man, sword, and Link are sprites drawn over this background.
+# In the NES image the fire sprites start at (72, 121) and (168, 121) pixels.
+# Tile 03 is snapped to the nearest symmetric grid positions, 8 pixels outward.
+screen 00 00
+01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01
+01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01
+01 01 00 00 00 00 00 00 00 00 00 00 00 00 01 01
+01 01 00 00 00 00 00 00 00 00 00 00 00 00 01 01
+01 01 00 00 03 00 00 00 00 00 00 03 00 00 01 01
+01 01 00 00 00 00 00 00 00 00 00 00 00 00 01 01
+01 01 00 00 00 00 00 00 00 00 00 00 00 00 01 01
+01 01 00 00 00 00 00 00 00 00 00 00 00 00 01 01
+01 01 00 00 00 00 00 00 00 00 00 00 00 00 01 01
+01 01 02 02 02 02 02 00 00 02 02 02 02 02 01 01
+01 01 01 01 01 01 01 00 00 01 01 01 01 01 01 01

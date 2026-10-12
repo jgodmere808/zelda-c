@@ -8,5 +8,7 @@ bool initMapCavex07y07();
 // unsigned char getMapTileCollisionMask(unsigned char tileId);
 // unsigned char getMapTileSwordCollisionMask(unsigned char tileId);
 
+bool isMapCavex07y07SolidAt();
+
 void updateMapCavex07y07();
 void drawMapCavex07y07();

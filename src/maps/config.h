@@ -29,4 +29,18 @@ typedef enum {
     MAP_TRANSITION_DOWN
 } MapTransition;
 
+typedef enum {
+    // Overworld Locations
+    MAP_LOCATION_OVERWORLD_SPAWN,
+    MAP_LOCATION_OVERWORLD_CAVE_x07_y07
+} MapLocation;
+
 typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
+
+typedef struct {
+    MapScreen *screen;
+    int row;
+    int col;
+    Vector2 pos;
+    MapLocation location;
+} MapLocationData;
