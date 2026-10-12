@@ -7,6 +7,64 @@
 
 #define MAP_OVERWORLD_SCREEN_PATH "map/overworld/row_%02d/screen_x%02d_y%02d.txt"
 
+/*
+ * Terrain collision metadata, indexed by the same ID as the tile atlas.
+ * Each bit covers one 8 x 8 quadrant of a 16 x 16 tile. These are base 
+ * terrain rules; individual screens can later override them for 
+ * entrances and changing terrain.
+ *
+ *   1 2
+ *   4 8
+ */
+
+static const unsigned char tileCollisionMask[MAP_ATLAS_TILE_COUNT] = {
+    /* 00-11: cliffs and open ground in the three palette variants. */
+    TILE_BLOCK_LEFT, TILE_SOLID, TILE_OPEN, TILE_BLOCK_RIGHT, TILE_SOLID, TILE_SOLID,
+    TILE_BLOCK_LEFT, TILE_SOLID, TILE_SOLID, TILE_BLOCK_RIGHT, TILE_SOLID, TILE_SOLID,
+    TILE_BLOCK_LEFT, TILE_SOLID, TILE_OPEN, TILE_BLOCK_RIGHT, TILE_SOLID, TILE_SOLID,
+
+    /* 12, 18, 1E are passages; only the south half of cave tile 16 is open. */
+    TILE_OPEN, TILE_SOLID, TILE_SOLID, TILE_BLOCK_RIGHT, TILE_BLOCK_TOP, TILE_SOLID,
+    TILE_OPEN, TILE_SOLID, TILE_SOLID, TILE_BLOCK_RIGHT, TILE_SOLID, TILE_SOLID,
+    TILE_OPEN, TILE_SOLID, TILE_SOLID, TILE_BLOCK_RIGHT, TILE_SOLID, TILE_SOLID,
+
+    /* 24-35: rock and tree walls, including cave entrances. */
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_SOLID,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_SOLID,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_SOLID,
+
+    /* 36-47: wall bases and banks; 3A and 46 are open ground. */
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_BLOCK_LEFT, TILE_OPEN, TILE_BLOCK_RIGHT,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_BLOCK_LEFT, TILE_SOLID, TILE_BLOCK_RIGHT,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_BLOCK_LEFT, TILE_OPEN, TILE_BLOCK_RIGHT,
+
+    /* 48-59: water and neighboring ground. */
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_OPEN, TILE_OPEN, TILE_OPEN,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_OPEN, TILE_OPEN, TILE_OPEN,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_OPEN, TILE_OPEN, TILE_OPEN,
+
+    /* 5A-6B: water and neighboring ground. */
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_OPEN, TILE_OPEN, TILE_OPEN,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_OPEN, TILE_OPEN, TILE_OPEN,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_OPEN, TILE_OPEN, TILE_OPEN,
+
+    /* 6C-7D: water and neighboring ground. */
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_OPEN, TILE_OPEN, TILE_OPEN,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_OPEN, TILE_OPEN, TILE_OPEN,
+    TILE_SOLID, TILE_SOLID, TILE_SOLID, TILE_OPEN, TILE_OPEN, TILE_OPEN,
+
+    /* 7E-8F: shoreline corners and land; 83, 89, 8F are wooden bridges. */
+    TILE_BLOCK_LEFT, TILE_OPEN, TILE_BLOCK_RIGHT, TILE_OPEN, TILE_SOLID, TILE_OPEN,
+    TILE_BLOCK_LEFT, TILE_OPEN, TILE_BLOCK_RIGHT, TILE_OPEN, TILE_SOLID, TILE_OPEN,
+    TILE_BLOCK_LEFT, TILE_OPEN, TILE_BLOCK_RIGHT, TILE_OPEN, TILE_SOLID, TILE_OPEN
+};
+
+unsigned char getMapOverworldTileCollisionMask(unsigned char tileId)
+{
+    if (tileId >= MAP_ATLAS_TILE_COUNT) return TILE_SOLID;
+    return tileCollisionMask[tileId];
+}
+
 typedef struct {
     MapScreen screens[MAP_OVERWORLD_ROWS][MAP_OVERWORLD_COLS];
 } MapOverworld;

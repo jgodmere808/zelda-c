@@ -29,7 +29,7 @@ static void moveLinkAxis(Link *link, float distance, bool horizontal)
         if (horizontal) next.x += direction * step;
         else next.y += direction * step;
 
-        if (!mapIsBlocked(getLinkFeetAt(link, next), false)) {
+        if (!mapIsBlocked(getLinkFeetAt(link, next))) {
             link->pos = next;
             remaining -= step;
             continue;
@@ -46,7 +46,7 @@ static void moveLinkAxis(Link *link, float distance, bool horizontal)
             if (horizontal) next.x += direction * middle;
             else next.y += direction * middle;
 
-            if (mapIsBlocked(getLinkFeetAt(link, next), false)) blocked = middle;
+            if (mapIsBlocked(getLinkFeetAt(link, next))) blocked = middle;
             else clear = middle;
         }
 

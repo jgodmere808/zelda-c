@@ -2,5 +2,7 @@
 
 #include "config.h"
 
+unsigned char getMapOverworldTileCollisionMask(unsigned char tileId);
+
 bool initMapOverworld();
 MapLocationData loadMapOverworld(MapLocation location);
