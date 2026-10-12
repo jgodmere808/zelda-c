@@ -15,4 +15,9 @@ bool mapIsBlocked(Rectangle location);
 MapChangeEvent getMapChangeEvent(Rectangle feet, Vector2 velocity);
 
 void updateMap();
+void updateMapEntering(MapChangeEvent *event, float *progress);
+void updateMapExiting(MapChangeEvent *event, float *progress);
+
 void drawMap();
+void drawMapEntering(MapChangeEvent *event, float *progress);
+void drawMapExiting(MapChangeEvent *event, float *progress);

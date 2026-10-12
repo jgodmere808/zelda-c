@@ -3,6 +3,9 @@
 #include "loader.h"
 #include "../texture_map.h"
 
+#define MAP_OVERWORLD_ENTERING_TIME 1.0f
+#define MAP_OVERWORLD_EXITING_TIME  1.0f
+
 #define MAP_OVERWORLD_ROWS  8
 #define MAP_OVERWORLD_COLS 16
 
@@ -170,6 +173,16 @@ void updateMapOverworld()
     return;
 }
 
+void updateMapOverworldEntering(float *progress)
+{
+    *progress += GetFrameTime() / MAP_OVERWORLD_ENTERING_TIME;
+}
+
+void updateMapOverworldExiting(float *progress)
+{
+    *progress += GetFrameTime() / MAP_OVERWORLD_EXITING_TIME;
+}
+
 void drawMapOverworld(MapScreen *screen)
 {
     for (int row = 0; row < MAP_SCREEN_ROWS; row++) {
@@ -204,4 +217,14 @@ void drawMapOverworld(MapScreen *screen)
             );
         }
     }
+}
+
+void drawMapOverworldEntering(MapScreen *screen, float *progress)
+{
+    drawMapOverworld(screen);
+}
+
+void drawMapOverworldExiting(MapScreen *screen, float *progress)
+{
+    drawMapOverworld(screen);
 }

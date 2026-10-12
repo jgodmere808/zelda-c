@@ -8,4 +8,9 @@ bool initMapOverworld();
 MapLocationData loadMapOverworld(MapLocation location);
 
 void updateMapOverworld();
+void updateMapOverworldEntering(float *progress);
+void updateMapOverworldExiting(float *progress);
+
 void drawMapOverworld(MapScreen *screen);
+void drawMapOverworldEntering(MapScreen *screen, float *progress);
+void drawMapOverworldExiting(MapScreen *screen, float *progress);

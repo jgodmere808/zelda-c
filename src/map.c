@@ -167,6 +167,34 @@ void updateMap()
     }
 }
 
+void updateMapEntering(MapChangeEvent *event, float *progress)
+{
+    switch (event->origin) {
+        case MAP_LOCATION_OVERWORLD_CAVE_x07_y07:
+            updateMapOverworldEntering(progress);
+            break;
+        case MAP_LOCATION_CAVE_x07_y07:
+            updateMapCavex07y07Entering(progress);
+            break;
+        default:
+            break;
+    }
+}
+
+void updateMapExiting(MapChangeEvent *event, float *progress)
+{
+    switch (event->destination) {
+        case MAP_LOCATION_OVERWORLD_CAVE_x07_y07:
+            updateMapOverworldExiting(progress);
+            break;
+        case MAP_LOCATION_CAVE_x07_y07:
+            updateMapCavex07y07Exiting(progress);
+            break;
+        default:
+            break;
+    }
+}
+
 void drawMap()
 {
     switch (map.mapRegion) {
@@ -178,5 +206,33 @@ void drawMap()
             break;
         default:
             return;
+    }
+}
+
+void drawMapEntering(MapChangeEvent *event, float *progress)
+{
+    switch (event->origin) {
+        case MAP_LOCATION_OVERWORLD_CAVE_x07_y07:
+            drawMapOverworldEntering(map.currentScreen, progress);
+            break;
+        case MAP_LOCATION_CAVE_x07_y07:
+            drawMapCavex07y07Entering(map.currentScreen, progress);
+            break;
+        default:
+            break;
+    }
+}
+
+void drawMapExiting(MapChangeEvent *event, float *progress)
+{
+    switch (event->destination) {
+        case MAP_LOCATION_OVERWORLD_CAVE_x07_y07:
+            drawMapOverworldExiting(map.currentScreen, progress);
+            break;
+        case MAP_LOCATION_CAVE_x07_y07:
+            drawMapCavex07y07Exiting(map.currentScreen, progress);
+            break;
+        default:
+            break;
     }
 }

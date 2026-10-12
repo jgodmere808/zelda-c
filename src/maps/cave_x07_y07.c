@@ -4,6 +4,9 @@
 #include "loader.h"
 #include "../texture_map.h"
 
+#define MAP_CAVE_ENTERING_TIME 0.1f
+#define MAP_CAVE_EXITING_TIME  1.0f
+
 #define CAVE_TILE_COUNT 4
 
 #define FIRE_ANIMATION_TIME 0.2f
@@ -73,6 +76,16 @@ void updateMapCavex07y07()
     return;
 }
 
+void updateMapCavex07y07Entering(float *progress)
+{
+    *progress += GetFrameTime() / MAP_CAVE_ENTERING_TIME;
+}
+
+void updateMapCavex07y07Exiting(float *progress)
+{
+    *progress += GetFrameTime() / MAP_CAVE_EXITING_TIME;
+}
+
 void drawMapCavex07y07(MapScreen *screen)
 {
     mapCavex07y07.fireAnimationTimer += GetFrameTime();
@@ -117,4 +130,14 @@ void drawMapCavex07y07(MapScreen *screen)
             );
         }
     }
+}
+
+void drawMapCavex07y07Entering(MapScreen *screen, float *progress)
+{
+    drawMapCavex07y07(screen);
+}
+
+void drawMapCavex07y07Exiting(MapScreen *screen, float *progress)
+{
+    drawMapCavex07y07(screen);
 }
