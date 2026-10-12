@@ -61,7 +61,7 @@ MapLocationData loadMapCavex07y07()
 {
     return (MapLocationData) {
         .screen = &mapCavex07y07.screen,
-        .pos = { 120, 192 }
+        .pos = { 120, 198 }
     };
 }
 
