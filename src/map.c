@@ -102,8 +102,10 @@ bool mapIsBlocked(Rectangle location)
     return false;
 }
 
-MapLocation getMapChangeEvent(Rectangle feet, Vector2 velocity)
+MapChangeEvent getMapChangeEvent(Rectangle feet, Vector2 velocity)
 {
+    MapChangeEvent event;
+
     float feetCenterX = feet.x + feet.width * 0.5f;
     float feetCenterY = feet.y + feet.height * 0.5f;
 
@@ -115,11 +117,15 @@ MapLocation getMapChangeEvent(Rectangle feet, Vector2 velocity)
          * Entrance tile 0x16 is at column 4, row 1:
          * x = 64..80; its walkable lower half is y = 80..88.
          */
-        if (map.currentScreen == entranceScreen &&
+        if (
+            map.currentScreen == entranceScreen &&
             velocity.y < 0 &&
             feetCenterX >= 64 && feetCenterX < 80 &&
-            feetCenterY >= 80 && feetCenterY < 88) {
-            return MAP_LOCATION_CAVE_x07_y07;
+            feetCenterY >= 80 && feetCenterY < 88
+        ) {
+            event.origin = MAP_LOCATION_OVERWORLD_CAVE_x07_y07;
+            event.destination = MAP_LOCATION_CAVE_x07_y07;
+            return event;
         }
     }
 
@@ -128,14 +134,21 @@ MapLocation getMapChangeEvent(Rectangle feet, Vector2 velocity)
          * The cave's bottom doorway occupies columns 7 and 8.
          * The final tile row begins at y = 216.
          */
-        if (velocity.y > 0 &&
+        if (
+            velocity.y > 0 &&
             feetCenterX >= 112 && feetCenterX < 144 &&
-            feetCenterY >= 216) {
-            return MAP_LOCATION_OVERWORLD_CAVE_x07_y07;
+            feetCenterY >= 216
+        ) {
+            event.origin = MAP_LOCATION_CAVE_x07_y07;
+            event.destination = MAP_LOCATION_OVERWORLD_CAVE_x07_y07;
+            return event;
         }
     }
 
-    return MAP_LOCATION_NONE;
+    event.origin = MAP_LOCATION_NONE;
+    event.destination = MAP_LOCATION_NONE;
+
+    return event;
 }
 
 void updateMap()

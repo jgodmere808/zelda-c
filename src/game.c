@@ -18,20 +18,14 @@ typedef enum {
     GAME_STATE_TRANSITIONING_DOWN
 } GameState;
 
-typedef enum {
-    MAP_CHANGE_EVENT_NONE,
-    MAP_CHANGE_EVENT_ENTERING,
-    MAP_CHANGE_EVENT_EXITING
-} MapChangeEvent;
-
 typedef struct {
     Link link;
-    MapChangeEvent mapChangeEvent;
 
     // for map change events
     GameState state;
     float enteringProgress;
     float exitingProgress;
+    MapLocation origin;
     MapLocation destination;
     Vector2 pos;
 } Game;
@@ -51,7 +45,6 @@ void initGame()
 
     game = (Game){
         .link = initLink(loadMap(MAP_LOCATION_OVERWORLD_SPAWN)),
-        .mapChangeEvent = MAP_CHANGE_EVENT_NONE,
 
         .state = GAME_STATE_PLAYING,
         .enteringProgress = 0,
@@ -79,10 +72,10 @@ void updateGame()
 
     // Capture a change event
     Rectangle feet = getLinkFeetAt(&game.link, game.link.pos);
-    MapLocation destination = getMapChangeEvent(feet, game.link.vel);
+    MapChangeEvent mapChangeEvent = getMapChangeEvent(feet, game.link.vel);
     // save that destination and start animation state
-    if (destination != MAP_LOCATION_NONE && game.state == GAME_STATE_PLAYING) {
-        game.destination = destination;
+    if (mapChangeEvent.destination != MAP_LOCATION_NONE && game.state == GAME_STATE_PLAYING) {
+        game.destination = mapChangeEvent.destination;
         game.state = GAME_STATE_ENTERING;
         game.enteringProgress = 0;
         game.exitingProgress = 0;
