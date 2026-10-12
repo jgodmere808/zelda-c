@@ -1,0 +1,55 @@
+#pragma once
+
+#include "config.h"
+
+typedef enum {
+    ITEM_ARROW = 0,
+    ITEM_SILVER_ARROW,
+    ITEM_BOMB,
+    ITEM_BOOK_OF_MAGIC,
+    ITEM_BOOMERANG,
+    ITEM_MAGICAL_BOOMERANG,
+    ITEM_BOW,
+    ITEM_BLUE_CANDLE,
+    ITEM_RED_CANDLE,
+    ITEM_CLOCK,
+    ITEM_COMPASS,
+    ITEM_FAIRY,
+    ITEM_FOOD,
+    ITEM_HEART,
+    ITEM_HEART_CONTAINER,
+    ITEM_KEY,
+    ITEM_MAGICAL_KEY,
+    ITEM_LETTER,
+    ITEM_MAGICAL_ROD,
+    ITEM_MAGICAL_SHIELD,
+    ITEM_MAP,
+    ITEM_LIFE_POTION,
+    ITEM_SECOND_POTION,
+    ITEM_POWER_BRACELET,
+    ITEM_RAFT,
+    ITEM_RECORDER,
+    ITEM_BLUE_RING,
+    ITEM_RED_RING,
+    ITEM_RUPEE,
+    ITEM_FIVE_RUPEES,
+    ITEM_STEPLADDER,
+    ITEM_SWORD,
+    ITEM_WHITE_SWORD,
+    ITEM_MAGICAL_SWORD,
+    ITEM_TRIFORCE,
+    ITEM_FAIRY_FRAME_1,
+    ITEM_HEART_FRAME_1,
+    ITEM_RUPEE_FRAME_1,
+    ITEM_TRIFORCE_FRAME_1
+} ItemType;
+
+typedef struct {
+    ItemType type;
+    bool onScreen;
+    Vector2 pos;
+} Item;
+
+initItem(Vector2 pos);
+updateItem(Item *item);
+drawItem(Item *item);
