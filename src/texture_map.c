@@ -30,7 +30,8 @@ bool initTextureMap()
         "resources/textures/overworld/tiles_16x16.png",
         "resources/textures/caves/tiles_16x16.png",
         "resources/textures/items/tiles_16x16.png",
-        "resources/textures/characters/link_spritesheet.png"
+        "resources/textures/characters/link_spritesheet.png",
+        "resources/textures/characters/old_man.png"
     };
 
     for (i = 0; i < TEXTURE_COUNT; i++) {

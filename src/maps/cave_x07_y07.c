@@ -5,9 +5,9 @@
 #include "../audio.h"
 #include "../texture_map.h"
 
-#define MAP_CAVE_ENTERING_TIME 0.1f
+#define MAP_CAVE_ENTERING_TIME 0
 #define MAP_CAVE_EXITING_TIME_WITH_SWORD  2.0f
-#define MAP_CAVE_EXITING_TIME_WITHOUT_SWORD 0.1f
+#define MAP_CAVE_EXITING_TIME_WITHOUT_SWORD 0
 
 #define CAVE_TILE_COUNT 4
 
@@ -32,6 +32,7 @@ typedef struct {
     MapScreen screen;
     float fireAnimationTimer;
     bool *collectedSword1; // linked to GameData
+    int lastCharCount;
 } MapCavex07y07;
 
 static MapCavex07y07 mapCavex07y07;
@@ -141,7 +142,18 @@ void drawMapCavex07y07(MapScreen *screen, bool isEnteringOrExiting)
         }
     }
 
-    if (*mapCavex07y07.collectedSword1 || isEnteringOrExiting) return;
+    if (*mapCavex07y07.collectedSword1) return;
+
+    DrawTexturePro(
+        textures[TEXTURE_OLD_MAN],
+        (Rectangle){ 0, 0, 16, 16 },
+        (Rectangle){ 120 * FACTOR, 120 * FACTOR, 16 * FACTOR, 16 * FACTOR },
+        (Vector2){ 0, 0 }, 0, WHITE
+    );
+
+    if (isEnteringOrExiting) return;
+
+    mapCavex07y07.lastCharCount = 0;
 
     const char *str[] = {
         "IT'S  DANGEROUS  TO  GO",
@@ -170,6 +182,11 @@ void drawMapCavex07y07Exiting(MapScreen *screen, float *progress)
     const int charsSoFar = (int)(*progress * totalChars);
     const int count1 = Clamp(charsSoFar, 0, TextLength(str1));
     const int count2 = Clamp(charsSoFar - count1, 0, TextLength(str2));
+
+    if (charsSoFar > mapCavex07y07.lastCharCount) {
+        mapCavex07y07.lastCharCount = charsSoFar;
+        playSound(SOUND_TEXT);
+    }
 
     DrawText(TextSubtext(str1, 0, count1), 46 * FACTOR, (35 + MAP_TOP) * FACTOR, 36, WHITE);
     DrawText(TextSubtext(str2, 0, count2), 66 * FACTOR, (45 + MAP_TOP) * FACTOR, 36, WHITE);

@@ -38,6 +38,7 @@ typedef enum {
 
     /* CHARACTERS */
     TEXTURE_LINK_SPRITESHEET,
+    TEXTURE_OLD_MAN,
 
     TEXTURE_COUNT
 } TextureType;
