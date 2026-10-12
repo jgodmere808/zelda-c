@@ -32,7 +32,11 @@ static Game game;
 void resetGameData(void)
 {
     gameData = (GameData){
-        .name = "LINK"
+        .name = "LINK",
+        .totalHearts = 3,
+        .currentHealth = 6,
+
+        .collectedSword1 = false
     };
 }
 

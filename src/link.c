@@ -173,7 +173,7 @@ void drawLinkEnteringCave(Link *link, float *progress)
 
     Rectangle destination = {
         link->pos.x * FACTOR,
-        (link->pos.y + 1) * FACTOR + 16 * FACTOR * (*progress),
+        link->pos.y * FACTOR + 16 * FACTOR * (*progress),
         16 * FACTOR,
         16 * FACTOR - 16 * FACTOR * (*progress)
     };
