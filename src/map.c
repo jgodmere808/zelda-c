@@ -3,6 +3,7 @@
 
 #include "audio.h"
 #include "texture_map.h"
+#include "item.h"
 
 #include "maps/overworld.h"
 #include "maps/cave_x07_y07.h"
@@ -15,6 +16,8 @@ typedef enum {
 
 typedef struct {
     MapScreen *currentScreen;
+    Item *screenItems;
+    int screenItemCount;
     MapRegion mapRegion;
 } Map;
 
@@ -48,6 +51,9 @@ Vector2 loadMap(MapLocation location)
     }
 
     map.currentScreen = data.screen;
+    map.screenItems = data.items;
+    map.screenItemCount = data.itemCount;
+
     return data.pos;
 }
 
@@ -102,6 +108,34 @@ bool mapIsBlocked(Rectangle location)
     return false;
 }
 
+bool mapTryPickupItem(Rectangle linkFeet)
+{
+    int i;
+
+    for (i = 0; i < map.screenItemCount; i++) {
+        Item *item = &map.screenItems[i];
+        if (!item->onScreen) continue;
+
+        Rectangle itemBounds = {
+            item->pos.x, item->pos.y, 16, 16
+        };
+        if (!CheckCollisionRecs(linkFeet, itemBounds)) continue;
+
+        switch (item->type) {
+            case ITEM_SWORD:
+                gameData.collectedSword1 = true;
+                break;
+            default:
+                continue; // no pickup behavior for this item yet
+        }
+
+        item->onScreen = false;
+        return true;
+    }
+
+    return false;
+}
+
 MapChangeEvent getMapChangeEvent(Rectangle feet, Vector2 velocity)
 {
     MapChangeEvent event;
@@ -146,6 +180,17 @@ MapChangeEvent getMapChangeEvent(Rectangle feet, Vector2 velocity)
     event.destination = MAP_LOCATION_NONE;
 
     return event;
+}
+
+static void drawMapItems(void)
+{
+    for (int i = 0; i < map.screenItemCount; i++) {
+        if (map.mapRegion == MAP_REGION_CAVE_x07_y07 &&
+            gameData.collectedSword1 && map.screenItems[i].type == ITEM_SWORD) {
+            continue;
+        }
+        drawItem(&map.screenItems[i]);
+    }
 }
 
 void updateMap()
@@ -204,6 +249,7 @@ void drawMap()
         default:
             return;
     }
+    drawMapItems();
 }
 
 void drawMapEntering(MapChangeEvent *event, float *progress)
@@ -218,6 +264,7 @@ void drawMapEntering(MapChangeEvent *event, float *progress)
         default:
             break;
     }
+    drawMapItems();
 }
 
 void drawMapExiting(MapChangeEvent *event, float *progress)
@@ -232,4 +279,5 @@ void drawMapExiting(MapChangeEvent *event, float *progress)
         default:
             break;
     }
+    drawMapItems();
 }

@@ -30,6 +30,8 @@ unsigned char getMapCavex07y07CollisionMask(unsigned char tileId)
 
 typedef struct {
     MapScreen screen;
+    Item items[MAX_MAP_SCREEN_ITEMS];
+    int itemCount;
     float fireAnimationTimer;
     bool *collectedSword1; // linked to GameData
     int lastCharCount;
@@ -45,7 +47,9 @@ bool initMapCavex07y07(bool *collectedSword1)
         return false;
     }
 
-    bool loaded = loaderLoadScreen(file, &mapCavex07y07.screen, 0, 0);
+    bool loaded = loaderLoadScreen(file, &mapCavex07y07.screen,
+                                   mapCavex07y07.items,
+                                   &mapCavex07y07.itemCount, 0, 0);
     fclose(file);
 
     if (!loaded) {
@@ -70,10 +74,21 @@ bool initMapCavex07y07(bool *collectedSword1)
     return true;
 }
 
-MapLocationData loadMapCavex07y07()
+MapLocationData loadMapCavex07y07(MapLocation location)
 {
+    int i;
+
+    for (i = 0; i < mapCavex07y07.itemCount; i++) {
+        Item *item = &mapCavex07y07.items[i];
+        if (item->type == ITEM_SWORD) {
+            item->onScreen = !*mapCavex07y07.collectedSword1;
+        }
+    }
+
     return (MapLocationData) {
         .screen = &mapCavex07y07.screen,
+        .items = mapCavex07y07.items,
+        .itemCount = mapCavex07y07.itemCount,
         .pos = { 120, 205 }
     };
 }

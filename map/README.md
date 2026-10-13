@@ -6,6 +6,8 @@ A file named `overworld/row_YY/screen_xXX_yYY.txt` belongs at world screen coord
 
 Each file is UTF-8 text. Lines beginning with `#` are comments. The `screen X Y` header repeats the zero-based decimal coordinates. Exactly 11 following lines each contain 16 two-digit hexadecimal tile IDs. The last tile row displays only its upper 8 pixels. Each screen is 256 × 168 visible pixels; the full world is 4096 × 1344 pixels.
 
+An optional `[items]` section follows the tile rows. Each item line is `name x y`, where `name` is the lowercase `ItemType` name without `ITEM_` (for example, `sword` or `heart_container`) and `x y` are the item's top-left position in game pixels. Coordinates include the 56-pixel HUD area, so a cave sword below the old man is `sword 124 144`. Each screen can contain up to 64 items. The loader rejects unknown names, extra fields, coordinates outside the visible map, and extra data without an `[items]` header.
+
 Each tile ID indexes [`tiles_16x16.png`](../resources/textures/overworld/tiles_16x16.png):
 
 ```text
@@ -17,4 +19,4 @@ source_y     = atlas_row * 16
 
 The data was converted from [Al Sweigart's NES Zelda overworld tile map](https://github.com/asweigart/nes_zelda_map_data/blob/master/overworld_map/nes_zelda_overworld_tile_map.txt). That source uses a 20-column index for its sheet; IDs here use this project's packed 18-column atlas. The source's off-sheet black tile was mapped to an identical black tile in this atlas.
 
-The map contains the visible terrain only. It does not encode Link, enemies, entrances, secrets, or collision rules. Those need separate game data when implemented. The source image is a reconstruction and may differ slightly in color from a particular NES palette.
+The overworld files currently contain the visible terrain only. The format can also encode items, but it does not encode Link, enemies, entrances, secrets, or collision rules. Those need separate game data when implemented. The source image is a reconstruction and may differ slightly in color from a particular NES palette.

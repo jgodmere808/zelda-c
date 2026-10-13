@@ -94,7 +94,13 @@ unsigned char getMapOverworldTileCollisionMask(unsigned char tileId)
 }
 
 typedef struct {
-    MapScreen screens[MAP_OVERWORLD_ROWS][MAP_OVERWORLD_COLS];
+    MapScreen screen;
+    Item items[MAX_MAP_SCREEN_ITEMS];
+    int itemCount;
+} MapOverworldScreen;
+
+typedef struct {
+    MapOverworldScreen screens[MAP_OVERWORLD_ROWS][MAP_OVERWORLD_COLS];
 } MapOverworld;
 
 static MapOverworld mapOverworld;
@@ -123,9 +129,9 @@ bool initMapOverworld()
                 return false;
             }
 
-            loaded = loaderLoadScreen(
-                file, &mapOverworld.screens[row][col], row, col
-            );
+            MapOverworldScreen *screen = &mapOverworld.screens[row][col];
+            loaded = loaderLoadScreen(file, &screen->screen, screen->items,
+                                      &screen->itemCount, row, col);
             fclose(file);
 
             if (!loaded) {
@@ -161,7 +167,9 @@ MapLocationData loadMapOverworld(MapLocation location)
     }
 
     locationData = (MapLocationData){
-        .screen = &mapOverworld.screens[row][col],
+        .screen = &mapOverworld.screens[row][col].screen,
+        .items = mapOverworld.screens[row][col].items,
+        .itemCount = mapOverworld.screens[row][col].itemCount,
         .pos = pos
     };
 

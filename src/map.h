@@ -11,6 +11,7 @@ bool initMap();
 Vector2 loadMap(MapLocation location);
 
 bool mapIsBlocked(Rectangle location);
+bool mapTryPickupItem(Rectangle linkFeet);
 
 MapChangeEvent getMapChangeEvent(Rectangle feet, Vector2 velocity);
 

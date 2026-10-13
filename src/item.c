@@ -2,7 +2,7 @@
 #include "item.h"
 #include "texture_map.h"
 
-initItem(ItemType type, bool onScreen, Vector2 pos)
+Item initItem(ItemType type, bool onScreen, Vector2 pos)
 {
     Item item = {
         .type = type,
@@ -13,12 +13,12 @@ initItem(ItemType type, bool onScreen, Vector2 pos)
     return item;
 }
 
-updateItem(Item *item)
+void updateItem(Item *item)
 {
     return;
 }
 
-drawItem(Item *item)
+void drawItem(Item *item)
 {
     if (!item->onScreen) return;
 

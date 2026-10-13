@@ -78,6 +78,8 @@ void updateGame()
             );
 
             Rectangle feet = getLinkFeetAt(&game.link, game.link.pos);
+            mapTryPickupItem(feet);
+
             game.mapChangeEvent = getMapChangeEvent(feet, game.link.vel);
             if (game.mapChangeEvent.destination != MAP_LOCATION_NONE) {
                 startMapChangeEvent();

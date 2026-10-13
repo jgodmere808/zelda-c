@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../config.h"
+#include "../item.h"
 
 #define MAP_TOP 56
 #define MAP_VISIBLE_HEIGHT (GAME_HEIGHT - MAP_TOP)
@@ -8,6 +9,8 @@
 #define MAP_SCREEN_ROWS 11
 #define MAP_SCREEN_COLS 16
 #define MAP_ATLAS_TILE_COUNT (18 * 8)
+
+#define MAX_MAP_SCREEN_ITEMS 64
 
 enum {
     TILE_OPEN = 0,
@@ -37,5 +40,7 @@ typedef unsigned char MapScreen[MAP_SCREEN_ROWS][MAP_SCREEN_COLS];
 
 typedef struct {
     MapScreen *screen;
+    Item *items;
+    int itemCount;
     Vector2 pos;
 } MapLocationData;

@@ -4,8 +4,8 @@
 
 unsigned char getMapCavex07y07CollisionMask(unsigned char tileId);
 
-bool initMapCavex07y07();
-MapLocationData loadMapCavex07y07();
+bool initMapCavex07y07(bool *collectedSword1);
+MapLocationData loadMapCavex07y07(MapLocation location);
 
 bool isMapCavex07y07SolidAt();
 

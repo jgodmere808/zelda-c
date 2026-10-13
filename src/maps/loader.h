@@ -2,4 +2,5 @@
 
 #include "config.h"
 
-bool loaderLoadScreen(FILE *file, MapScreen *mapScreen, int mapRow, int mapCol);
+bool loaderLoadScreen(FILE *file, MapScreen *mapScreen, Item *items,
+                      int *itemCount, int mapRow, int mapCol);

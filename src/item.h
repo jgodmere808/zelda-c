@@ -50,6 +50,6 @@ typedef struct {
     Vector2 pos;
 } Item;
 
-initItem(Vector2 pos);
-updateItem(Item *item);
-drawItem(Item *item);
+Item initItem(ItemType type, bool onScreen, Vector2 pos);
+void updateItem(Item *item);
+void drawItem(Item *item);
