@@ -34,6 +34,7 @@ typedef struct {
     int itemCount;
     float fireAnimationTimer;
     bool *collectedSword1; // linked to GameData
+    bool sceneVisible;
     int lastCharCount;
 } MapCavex07y07;
 
@@ -84,6 +85,8 @@ MapLocationData loadMapCavex07y07(MapLocation location)
             item->onScreen = !*mapCavex07y07.collectedSword1;
         }
     }
+
+    mapCavex07y07.sceneVisible = !*mapCavex07y07.collectedSword1;
 
     return (MapLocationData) {
         .screen = &mapCavex07y07.screen,
@@ -157,7 +160,7 @@ void drawMapCavex07y07(MapScreen *screen, bool isEnteringOrExiting)
         }
     }
 
-    if (*mapCavex07y07.collectedSword1) return;
+    if (!mapCavex07y07.sceneVisible) return;
 
     DrawTexturePro(
         textures[TEXTURE_OLD_MAN],
@@ -188,7 +191,7 @@ void drawMapCavex07y07Exiting(MapScreen *screen, float *progress)
 {
     drawMapCavex07y07(screen, true);
 
-    if (*mapCavex07y07.collectedSword1) return;
+    if (!mapCavex07y07.sceneVisible) return;
 
     const int totalChars = 43;
     const char *str1 = "IT'S  DANGEROUS  TO  GO";

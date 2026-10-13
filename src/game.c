@@ -2,9 +2,14 @@
 #include "game.h"
 
 #include "audio.h"
+#include "item.h"
+#include "texture_map.h"
+
+#define FANFARE_FRAMES 128
 
 typedef enum {
     GAME_STATE_PLAYING,
+    GAME_STATE_FANFARE,
 
     GAME_STATE_ENTERING,
     GAME_STATE_EXITING,
@@ -20,6 +25,7 @@ typedef struct {
 
     // for map change events
     GameState state;
+    int fanfareFramesRemaining;
     float enteringProgress;
     float exitingProgress;
     MapChangeEvent mapChangeEvent;
@@ -46,6 +52,7 @@ void initGame()
         .link = initLink(loadMap(MAP_LOCATION_OVERWORLD_SPAWN)),
 
         .state = GAME_STATE_PLAYING,
+        .fanfareFramesRemaining = 0,
         .enteringProgress = 0,
         .exitingProgress = 0,
         .mapChangeEvent = (MapChangeEvent){ MAP_LOCATION_NONE, MAP_LOCATION_NONE }
@@ -59,6 +66,14 @@ static void startMapChangeEvent()
     game.exitingProgress = 0;
     changeMusic(MUSIC_NONE);
     playSound(SOUND_CAVE_ENTRANCE);
+}
+
+static void startFanfareAnimation()
+{
+    game.state = GAME_STATE_FANFARE;
+    game.fanfareFramesRemaining = FANFARE_FRAMES;
+    game.link.vel = (Vector2){ 0, 0 };
+    playSound(SOUND_FANFARE);
 }
 
 void updateGame()
@@ -78,11 +93,21 @@ void updateGame()
             );
 
             Rectangle feet = getLinkFeetAt(&game.link, game.link.pos);
-            mapTryPickupItem(feet);
+            if (mapTryPickupItem(feet)) {
+                startFanfareAnimation();
+                break;
+            }
 
             game.mapChangeEvent = getMapChangeEvent(feet, game.link.vel);
             if (game.mapChangeEvent.destination != MAP_LOCATION_NONE) {
                 startMapChangeEvent();
+            }
+            break;
+        }
+
+        case GAME_STATE_FANFARE: {
+            if (--game.fanfareFramesRemaining == 0) {
+                game.state = GAME_STATE_PLAYING;
             }
             break;
         }
@@ -122,12 +147,43 @@ static bool exitingCave(MapChangeEvent event)
     );
 }
 
+static void drawLinkLiftingItem(void)
+{
+    Rectangle source = { 72, 12, 16, 16 };
+    Rectangle destination = {
+        game.link.pos.x * FACTOR,
+        game.link.pos.y * FACTOR,
+        16 * FACTOR,
+        16 * FACTOR
+    };
+
+    DrawTexturePro(
+        textures[TEXTURE_LINK_SPRITESHEET],
+        source,
+        destination,
+        (Vector2){ 0, 0 },
+        0,
+        WHITE
+    );
+
+    Item heldItem = initItem(
+        ITEM_SWORD,
+        true,
+        (Vector2){ game.link.pos.x, game.link.pos.y - 16 }
+    );
+    drawItem(&heldItem);
+}
+
 void drawGame()
 {
     switch (game.state) {
         case GAME_STATE_PLAYING:
             drawMap();
             drawLink(&game.link);
+            break;
+        case GAME_STATE_FANFARE:
+            drawMap();
+            drawLinkLiftingItem();
             break;
         case GAME_STATE_ENTERING:
             drawMapEntering(&game.mapChangeEvent, &game.enteringProgress);

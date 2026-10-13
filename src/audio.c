@@ -14,7 +14,8 @@ static Audio audio;
 const char *soundPaths[] = {
     "resources/audio/cave_entrance.mp3",
     "resources/audio/cave_entrance_stairs.mp3",
-    "resources/audio/text.wav"
+    "resources/audio/text.wav",
+    "resources/audio/fanfare.wav"
 };
 
 bool initAudio()
